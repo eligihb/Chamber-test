@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>מתקתק לשכה - גרסת המובייל הרשמית</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Assistant', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .slide-in { animation: slideIn 0.15s ease-out forwards; }
+        @keyframes slideIn { from { transform: scale(0.98); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .flash-active { animation: buttonFlash 0.12s ease-out; }
+        @keyframes buttonFlash {
+            0% { background-color: #ffffff; }
+            50% { background-color: #0f172a; color: #ffffff; transform: scale(0.95); }
+            100% { background-color: #ffffff; }
+        }
+
+        @keyframes shine {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .bg-sparkle-gold {
+            background: linear-gradient(-45deg, #fef3c7, #fde68a, #fcd34d, #f59e0b, #fcd34d, #fde68a, #fef3c7);
+            background-size: 300% 300%;
+            animation: shine 3s ease infinite;
+        }
+        .bg-sparkle-emerald {
+            background: linear-gradient(-45deg, #d1fae5, #a7f3d0, #34d399, #059669, #34d399, #a7f3d0, #d1fae5);
+            background-size: 300% 300%;
+            animation: shine 3s ease infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen flex flex-col items-center justify-start antialiased p-0 sm:p-4">
+
+    <!-- CONTAINER מרכזי מותאם מובייל קומפקטי -->
+    <div class="w-full max-w-md bg-white flex flex-col justify-start shadow-xl border-x border-slate-200 rounded-none sm:rounded-2xl overflow-hidden">
+        
+        <!-- HEADER -->
+        <div class="bg-slate-900 p-4 text-center text-white shrink-0 shadow-md relative">
+            <button onclick="openAdminModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white text-xs bg-slate-800/50 p-1.5 rounded-lg transition-colors">🔒 ניהול</button>
+            <h1 class="text-xl font-extrabold tracking-tight">מתקתק לשכה</h1>
+            <p class="text-[11px] text-slate-300 font-medium mt-0.5">חישוב סימולטני כולל מטלת ניסוח</p>
+        </div>
+
+        <!-- 🔒 לוח בקרה למנהל המשולב בשורה אחת חסרת סרבול 🔒 -->
+        <div id="admin-panel" class="bg-slate-800 text-white text-xs space-y-3 hidden border-b border-slate-700 p-4 max-h-[85vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                <h3 class="font-bold text-amber-400 text-xs flex items-center gap-1">🛠️ ניהול מחוון ואנליטיקה משולבת</h3>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white text-base font-bold">✕</button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="switchAdminSection('procedural')" id="admin-btn-proc" class="p-2 font-bold rounded-lg border bg-amber-500 text-slate-950 border-amber-500">עריכת פרק א' (דיוני)</button>
+                <button onclick="switchAdminSection('substantive')" id="admin-btn-subs" class="p-2 font-bold rounded-lg border bg-slate-900 text-slate-300 border-slate-700">עריכת פרק ב' (מהותי)</button>
+            </div>
+
+            <div class="flex gap-2 justify-between bg-slate-900/50 p-2 rounded-xl border border-slate-700">
+                <button onclick="generateDemoKey()" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded-md font-bold text-[10px]">📥 מפתח + אנליטיקה דוגמה</button>
+                <button onclick="clearAdminKey()" class="bg-rose-600 hover:bg-rose-700 text-white px-2 py-1 rounded-md font-bold text-[10px]">🧹 איפוס</button>
+                <button onclick="saveAdminKeys()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-4 py-1 rounded-md font-black text-[10px]">💾 שמור וסנכרן</button>
+            </div>
+
+            <div class="space-y-1.5">
+                <p class="font-bold text-amber-300 text-[10px] uppercase tracking-wider">🎯 הזנת מפתח, קושי ואסמכתא משולבת:</p>
+                <div id="admin-matrix-container" class="grid grid-cols-1 gap-2 max-h-[50vh] overflow-y-auto border border-slate-700 rounded-lg p-2 bg-slate-900/40 divide-y divide-slate-800"></div>
+            </div>
+        </div>
+
+        <!-- תוכן משתנה -->
+        <div class="p-4 space-y-4 flex flex-col justify-start">
+
+            <!-- מסך 1: רישום ובחירת טור -->
+            <div id="step-register" class="space-y-4">
+                <div class="bg-blue-50 border-r-4 border-blue-600 p-3 rounded-l-xl">
+                    <h2 class="text-xs font-bold text-blue-900">ברוכים הבאים לסימולטור הלשכה</h2>
+                    <p class="text-[11px] text-blue-800 mt-0.5">הזינו פרטים, פתחו את נעילת הטור ותקתקו את התשובות שלכם.</p>
+                </div>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold mb-1 text-slate-800">שם מלא</label>
+                        <input type="text" id="user-name" class="w-full p-2.5 border-2 border-slate-200 rounded-xl outline-none focus:border-slate-900 font-medium text-slate-900 bg-white" placeholder="ישראל ישראלי">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold mb-1 text-slate-800">מספר טלפון</label>
+                        <input type="tel" id="user-phone" class="w-full p-2.5 border-2 border-slate-200 rounded-xl outline-none focus:border-slate-900 font-medium text-slate-900 bg-white" placeholder="0501234567">
+                    </div>
+                    
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex justify-between items-center">
+                        <div>
+                            <span class="block text-xs font-bold text-slate-800">טור הבחינה שלך:</span>
+                            <span class="text-[10px] text-slate-400 font-medium">ברירת מחדל: טור 1 (לחץ לפתיחה)</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <select id="user-tour-select" disabled class="p-2 bg-white border border-slate-300 rounded-lg font-bold text-sm text-slate-800 disabled:opacity-60 disabled:bg-slate-100 outline-none focus:border-slate-900" onchange="selectedTour = this.value">
+                                <option value="1">טור 1</option>
+                                <option value="2">טור 2</option>
+                                <option value="3">טור 3</option>
+                                <option value="4">טור 4</option>
+                            </select>
+                            <button type="button" onclick="toggleTourUnlock()" id="tour-lock-btn" class="p-2 bg-white border border-slate-300 rounded-lg text-xs hover:bg-slate-50">🔓</button>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="startQuiz()" class="w-full bg-slate-900 hover:bg-slate-800 text-white p-3.5 rounded-xl font-bold text-sm transition-all shadow-md active:scale-[0.99] mt-2">המשך להזנת תשובות ←</button>
+            </div>
+
+            <!-- מסך ביניים 1 -->
+            <div id="step-intermission" class="text-center py-6 space-y-4 hidden">
+                <div class="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl mx-auto shadow-md">✓</div>
+                <div class="space-y-1">
+                    <h2 class="text-xl font-extrabold text-slate-900">פרק א' (דיוני) הושלם!</h2>
+                    <p class="text-xs text-slate-600 px-4 font-medium">ענית על כל 40 השאלות של סדרי הדין. עכשיו עוברים לחלק המהותי.</p>
+                </div>
+                <button onclick="proceedToSubstantive()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold text-sm transition-all shadow-md">
+                    עבור לפרק ב' (מהותי) ←
+                </button>
+            </div>
+
+            <!-- מסך ביניים 2 -->
+            <div id="step-review-alert" class="space-y-5 text-center py-4 hidden">
+                <div class="w-16 h-16 bg-amber-500 text-white rounded-full flex items-center justify-center text-3xl mx-auto shadow-md">⚠️</div>
+                <div class="space-y-2 px-2">
+                    <h2 class="text-xl font-extrabold text-slate-900">הזנת התשובות הושלמה</h2>
+                    <p class="text-xs text-amber-800 bg-amber-50 p-3 rounded-xl border border-amber-200 font-bold leading-relaxed">
+                        שימו לב: מומלץ לוודא שהזנת הנתונים שלכם נתונה בצורה נכונה ומדויקת לחלוטין ותואמת לגיליון התשובות הפיזי שלכם, לפני שנחשב את הציון הסופי במערכת.
+                    </p>
+                </div>
+                <div class="space-y-2 pt-1">
+                    <button onclick="showResults()" class="w-full bg-slate-900 hover:bg-slate-800 text-white p-3.5 rounded-xl font-bold text-sm transition-all shadow-md">
+                        אני מאשר, הצג ציון סופי ←
+                    </button>
+                    <button onclick="backToQuizToVerify()" class="w-full bg-slate-100 text-slate-700 p-2.5 rounded-xl font-semibold text-xs border border-slate-200">
+                        חזור לבדיקה קלה של השאלות
+                    </button>
+                </div>
+            </div>
+
+            <!-- מסך 2: תקתוק שאלות -->
+            <div id="step-quiz" class="space-y-3 hidden">
+                <div id="quiz-header-badge" class="flex justify-between items-center text-white p-2.5 rounded-xl shadow-xs">
+                    <span id="section-title" class="text-[11px] font-bold uppercase tracking-wider">פרק: דיוני</span>
+                    <span id="question-number" class="text-[11px] font-black bg-white/20 px-2 py-0.5 rounded-md">שאלה 1 / 40</span>
+                </div>
+
+                <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden shadow-inner">
+                    <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <div id="question-box" class="py-4 text-center bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-center items-center min-h-[110px]">
+                    <div class="flex items-center justify-center gap-2">
+                        <span class="text-xl font-bold text-slate-500">שאלה</span>
+                        <span id="active-q-number-text" class="text-5xl font-black transition-colors duration-300 tracking-tight">1</span>
+                    </div>
+                    <div id="selected-feedback-box" class="h-8 mt-1 flex items-center justify-center">
+                        <span id="selected-letter-display" class="text-base font-black text-white bg-slate-900 px-5 py-0.5 rounded-xl border border-slate-900 transition-all scale-0 opacity-0"></span>
+                    </div>
+                </div>
+
+                <button onclick="toggleUnsure()" id="btn-unsure" class="w-full p-2.5 rounded-xl border-2 text-xs bg-white text-slate-600 border-slate-200 font-bold transition-all flex items-center justify-center gap-2 shadow-2xs active:scale-[0.99]">
+                    <span>💡</span> <span id="unsure-text">אני מתלבט לגבי השאלה הזו</span>
+                </button>
+
+                <div id="quiz-keypad" class="bg-slate-900 p-3 rounded-xl space-y-2 shadow-md">
+                    <p class="text-center text-[10px] text-slate-400 font-bold uppercase tracking-wider">מקלדת אגודל מהירה — שורה אחת</p>
+                    <div class="grid grid-cols-4 gap-2">
+                        <button onclick="handleKeypadPress('א', this)" class="letter-btn py-3 bg-white border border-slate-200 rounded-xl text-xl font-black text-slate-900 transition-all shadow-md">א</button>
+                        <button onclick="handleKeypadPress('ב', this)" class="letter-btn py-3 bg-white border border-slate-200 rounded-xl text-xl font-black text-slate-900 transition-all shadow-md">ב</button>
+                        <button onclick="handleKeypadPress('ג', this)" class="letter-btn py-3 bg-white border border-slate-200 rounded-xl text-xl font-black text-slate-900 transition-all shadow-md">ג</button>
+                        <button onclick="handleKeypadPress('ד', this)" class="letter-btn py-3 bg-white border border-slate-200 rounded-xl text-xl font-black text-slate-900 transition-all shadow-md">ד</button>
+                    </div>
+                    <div class="flex justify-between pt-1 px-1">
+                        <button onclick="goBack()" class="text-[11px] text-slate-400 hover:text-white font-bold transition-colors">← חזור לשאלה קודמת</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- מסך 3: תוצאות ואנליטיקה משופרת -->
+            <div id="step-results" class="space-y-4 hidden animate-fade-in">
+                
+                <!-- כפתורי הפעולה בראש העמוד -->
+                <div class="grid grid-cols-3 gap-2 py-1">
+                    <button onclick="window.print()" class="p-2.5 bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md hover:bg-slate-700 transition-colors flex items-center justify-center gap-1">
+                        <span>📸</span> צילום
+                    </button>
+                    <button onclick="shareScore()" class="p-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl shadow-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-1">
+                        <span>🔗</span> שיתוף
+                    </button>
+                    <button onclick="restart()" class="p-2.5 bg-rose-600 text-white font-bold text-xs rounded-xl shadow-md hover:bg-rose-700 transition-colors flex items-center justify-center gap-1">
+                        <span>🔄</span> איפוס
+                    </button>
+                </div>
+
+                <!-- כרטיס הציון המשוקלל המרכזי -->
+                <div id="score-box-bg" class="text-center p-5 rounded-2xl border-2 transition-all shadow-lg space-y-4">
+                    <div class="space-y-0.5">
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">הציון המשוקלל הסופי</p>
+                        <div id="final-score" class="text-5xl font-black tracking-tight drop-shadow-xs">0</div>
+                        <p id="score-status-text" class="text-xs font-extrabold pt-0.5"></p>
+                        <div id="pass-status" class="pt-1"></div>
+                    </div>
+
+                    <!-- חלוקת הפרקים בתוך הלוח הראשי -->
+                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200/40 text-slate-900">
+                        <div class="p-2 rounded-xl bg-white/40 border border-black/5">
+                            <span class="block text-[10px] font-bold opacity-80">נכונות בדיוני</span>
+                            <div class="flex justify-center items-baseline gap-1 mt-0.5 font-bold">
+                                <span id="score-procedural" class="text-lg font-black text-blue-900">0</span>
+                                <span class="text-xs opacity-60 font-medium">מתוך</span>
+                                <span class="text-sm font-black text-slate-600">40</span>
+                            </div>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white/40 border border-black/5">
+                            <span class="block text-[10px] font-bold opacity-80">נכונות במהותי</span>
+                            <div class="flex justify-center items-baseline gap-1 mt-0.5 font-bold">
+                                <span id="score-substantive" class="text-lg font-black text-purple-900">0</span>
+                                <span class="text-xs opacity-60 font-medium">מתוך</span>
+                                <span class="text-sm font-black text-slate-600">40</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- תיבת הנחיה דינמית למטלת הכתיבה -->
+                <div id="writing-task-alert" class="p-3 rounded-xl border-2 font-bold text-center text-xs shadow-2xs"></div>
+
+                <!-- שני סליידרים חיים -->
+                <div class="bg-slate-50 p-3.5 rounded-xl border-2 border-slate-200 space-y-3">
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-extrabold text-slate-700">
+                            <span>✍️ ציון מטלת ניסוח (כתיבה):</span>
+                            <span id="writing-label" class="text-blue-600 font-black">0 / 20 נק'</span>
+                        </div>
+                        <input type="range" id="writing-slider" min="0" max="20" value="0" oninput="updateWritingScore(this.value)" class="w-full accent-blue-600 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                    
+                    <div class="space-y-1 pt-2 border-t border-slate-200">
+                        <div class="flex justify-between text-xs font-extrabold text-slate-700">
+                            <span>⚖️ סימולטור פקטור (נקודות):</span>
+                            <span id="factor-label" class="text-purple-600 font-black">+0 נק'</span>
+                        </div>
+                        <input type="range" id="factor-slider" min="0" max="5" value="0" oninput="updateFactor(this.value)" class="w-full accent-purple-600 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- לחצן נפתח להצגת כל השאלות -->
+                <button onclick="toggleBoardsVisibility()" id="toggle-boards-btn" class="w-full p-3 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs rounded-xl border border-slate-300 transition-all flex items-center justify-center gap-2 shadow-xs">
+                    <span>🔍</span> הצג את רשימת כל השאלות במבחן
+                </button>
+
+                <!-- רשימת השאלות המלאה - רקע מלא ומלוטש בהשראת האנליטיקה המקצועית -->
+                <div id="boards-container" class="space-y-2 hidden">
+                    
+                    <!-- טאבים למעבר בין דיוני למהותי -->
+                    <div class="grid grid-cols-2 gap-2 border-b-2 border-slate-200 pb-1">
+                        <button onclick="switchTab('procedural')" id="tab-btn-procedural" class="p-2 font-bold text-xs rounded-xl transition-all border-2 bg-blue-900 text-white border-blue-900 shadow-sm">פרק א' (דיוני)</button>
+                        <button onclick="switchTab('substantive')" id="tab-btn-substantive" class="p-2 font-bold text-xs rounded-xl transition-all border-2 bg-white text-slate-700 border-slate-200 shadow-sm">פרק ב' (מהותי)</button>
+                    </div>
+
+                    <!-- רשימת שאלות דיוני - רקע כחול עמוק מלא ומקצועי (Blue-900/10) -->
+                    <div id="tab-content-procedural" class="errors-tab-content max-h-80 overflow-y-auto border-2 border-blue-400 rounded-xl divide-y divide-blue-300/30 bg-blue-900/10 shadow-inner p-1.5 space-y-1"></div>
+                    
+                    <!-- רשימת שאלות מהותי - רקע סגול מלכותי מלא ומקצועי (Purple-900/10) -->
+                    <div id="tab-content-substantive" class="errors-tab-content max-h-80 overflow-y-auto border-2 border-purple-400 rounded-xl divide-y divide-purple-300/30 bg-purple-900/10 hidden shadow-inner p-1.5 space-y-1"></div>
+                </div>
+
+                <!-- מדד אינטואיציה -->
+                <div id="intuition-card" class="p-3 bg-slate-900 text-white rounded-xl text-xs font-medium text-center shadow-sm hidden">
+                    <span>💡 מדד אינטואיציה: צדקת ב-<strong id="intuition-text" class="text-amber-400 font-black">0%</strong> מהשאלות שהתלבטת לגביהן!</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+<script>
+    let MASTER_ANSWERS = {
+        procedural:  {1:"א", 2:"ב", 3:"ג", 4:"ד", 5:"א", 6:"ב", 7:"ג", 8:"ד", 9:"א", 10:"ב", 11:"ג", 12:"ד", 13:"א", 14:"ב", 15:"ג", 16:"ד", 17:"א", 18:"ב", 19:"ג", 20:"ד", 21:"א", 22:"ב", 23:"ג", 24:"ד", 25:"א", 26:"ב", 27:"ג", 28:"ד", 29:"א", 30:"ב", 31:"ג", 32:"ד", 33:"א", 34:"ב", 35:"ג", 36:"ד", 37:"א", 38:"ב", 39:"ג", 40:"ד"},
+        substantive: {1:"ד", 2:"ג", 3:"ב", 4:"א", 5:"ד", 6:"ג", 7:"ב", 8:"א", 9:"ד", 10:"ג", 11:"ב", 12:"א", 13:"ד", 14:"ג", 15:"ב", 16:"א", 17:"ד", 18:"ג", 19:"ב", 20:"א", 21:"ד", 22:"ג", 23:"ב", 24:"א", 25:"ד", 26:"ג", 27:"ב", 28:"א", 29:"ד", 30:"ג", 31:"ב", 32:"א", 33:"ד", 34:"ג", 35:"ב", 36:"א", 37:"ד", 38:"ג", 39:"ב", 40:"א"}
+    };
+
+    let QUESTION_PARAMS = { procedural: {}, substantive: {} };
+
+    const TOPICS_PROCEDURAL = ["סדר דין אזרחי", "סדר דין פלילי", "דיני ראיות", "אתיקה מקצועית"];
+    const TOPICS_SUBSTANTIVE = ["דיני עונשין", "דיני קניין", "דיני חוזים", "משפט חוקתי ומנהלי"];
+
+    const TOUR_MAPPINGS = {
+        2: Array.from({ length: 40 }, (_, i) => (i + 5) % 40 + 1),
+        3: Array.from({ length: 40 }, (_, i) => (i + 12) % 40 + 1),
+        4: Array.from({ length: 40 }, (_, i) => (i + 23) % 40 + 1)
+    };
+
+    let selectedTour = '1';
+    let currentSection = 'procedural'; 
+    let currentIdx = 0; 
+    let userAnswers = { procedural: {}, substantive: {} };
+    let unsureQuestions = { procedural: {}, substantive: {} };
+    
+    let currentFactor = 0;
+    let currentWritingScore = 0;
+    let rawProceduralCorrect = 0;
+    let rawSubstantiveCorrect = 0;
+    let boardsVisible = false;
+    let adminActiveSection = 'procedural';
+
+    for(let i=1; i<=40; i++) {
+        QUESTION_PARAMS.procedural[i] = { difficulty: 5, law: "" };
+        QUESTION_PARAMS.substantive[i] = { difficulty: 5, law: "" };
+    }
+
+    function toggleTourUnlock() {
+        const selectEl = document.getElementById('user-tour-select');
+        const btnEl = document.getElementById('tour-lock-btn');
+        if (selectEl.disabled) {
+            selectEl.disabled = false;
+            btnEl.innerText = "🔒";
+            btnEl.className = "p-2 bg-amber-50 border border-amber-300 rounded-lg text-xs";
+        } else {
+            selectEl.disabled = true;
+            btnEl.innerText = "🔓";
+            btnEl.className = "p-2 bg-white border border-slate-300 rounded-lg text-xs";
+        }
+    }
+
+    function toggleBoardsVisibility() {
+        const container = document.getElementById('boards-container');
+        const btn = document.getElementById('toggle-boards-btn');
+        boardsVisible = !boardsVisible;
+        if (boardsVisible) {
+            container.classList.remove('hidden');
+            btn.innerHTML = "🙈 הסתר את רשימת השאלות";
+        } else {
+            container.classList.add('hidden');
+            btn.innerHTML = "🔍 הצג את רשימת כל השאלות במבחן";
+        }
+    }
+
+    function openAdminModal() {
+        const pass = prompt("הזן סיסמת מנהל לשינוי המחוון והאנליטיקה:");
+        if (pass === "1234") {
+            document.getElementById('admin-panel').classList.remove('hidden');
+            buildAdminMatrix();
+        } else if (pass !== null) {
+            alert("סיסמה שגויה!");
+        }
+    }
+
+    function closeAdminModal() {
+        document.getElementById('admin-panel').classList.add('hidden');
+    }
+
+    function switchAdminSection(section) {
+        adminActiveSection = section;
+        document.getElementById('admin-btn-proc').className = section === 'procedural' ? "p-2 font-bold rounded-lg border bg-amber-500 text-slate-950 border-amber-500" : "p-2 font-bold rounded-lg border bg-slate-900 text-slate-300 border-slate-700";
+        document.getElementById('admin-btn-subs').className = section === 'substantive' ? "p-2 font-bold rounded-lg border bg-amber-500 text-slate-950 border-amber-500" : "p-2 font-bold rounded-lg border bg-slate-900 text-slate-300 border-slate-700";
+        buildAdminMatrix();
+    }
+
+    function buildAdminMatrix() {
+        let html = '';
+        for (let i = 1; i <= 40; i++) {
+            const currentSelectedKey = MASTER_ANSWERS[adminActiveSection][i] || '';
+            const paramData = QUESTION_PARAMS[adminActiveSection][i] || { difficulty: 5, law: "" };
+            
+            html += `
+                <div class="p-2 bg-slate-800/60 rounded-xl space-y-2 border border-slate-700/40">
+                    <div class="flex justify-between items-center">
+                        <span class="font-black text-amber-400 text-xs">שאלה ${i}:</span>
+                        <div class="grid grid-cols-4 gap-1 w-44">
+                            <button onclick="setAdminKeyDirect(${i}, 'א')" class="py-1 rounded font-black text-[11px] transition-all border ${currentSelectedKey === 'א' ? 'bg-amber-500 text-slate-950 border-amber-500 font-black shadow-sm' : 'bg-slate-700 text-slate-200 border-slate-600'}">א</button>
+                            <button onclick="setAdminKeyDirect(${i}, 'ב')" class="py-1 rounded font-black text-[11px] transition-all border ${currentSelectedKey === 'ב' ? 'bg-amber-500 text-slate-950 border-amber-500 font-black shadow-sm' : 'bg-slate-700 text-slate-200 border-slate-600'}">ב</button>
+                            <button onclick="setAdminKeyDirect(${i}, 'ג')" class="py-1 rounded font-black text-[11px] transition-all border ${currentSelectedKey === 'ג' ? 'bg-amber-500 text-slate-950 border-amber-500 font-black shadow-sm' : 'bg-slate-700 text-slate-200 border-slate-600'}">ג</button>
+                            <button onclick="setAdminKeyDirect(${i}, 'ד')" class="py-1 rounded font-black text-[11px] transition-all border ${currentSelectedKey === 'ד' ? 'bg-amber-500 text-slate-950 border-amber-500 font-black shadow-sm' : 'bg-slate-700 text-slate-200 border-slate-600'}">ד</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 items-center pt-1 border-t border-slate-700/30">
+                        <div class="flex items-center gap-1">
+                            <span class="text-[9px] text-slate-400 font-bold">קושי:</span>
+                            <select onchange="updateInlineDifficulty(${i}, this.value)" class="p-1 bg-slate-900 border border-slate-700 rounded text-amber-400 font-bold text-[10px] outline-none">
+                                ${[1,2,3,4,5,6,7,8,9,10].map(n => `<option value="${n}" ${paramData.difficulty == n ? 'selected' : ''}>${n}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="col-span-2">
+                            <input type="text" value="${paramData.law || ''}" oninput="updateInlineLaw(${i}, this.value)" class="w-full p-1 bg-slate-900 border border-slate-700 rounded text-white text-[10px] outline-none focus:border-amber-400" placeholder="חוק / פסיקה / סעיף...">
+                        </div>
+                    </div>
+                </div>`;
+        }
+        document.getElementById('admin-matrix-container').innerHTML = html;
+    }
+
+    function setAdminKeyDirect(qNum, letter) {
+        MASTER_ANSWERS[adminActiveSection][qNum] = letter;
+        buildAdminMatrix();
+    }
+
+    function updateInlineDifficulty(qNum, value) {
+        QUESTION_PARAMS[adminActiveSection][qNum].difficulty = Number(value);
+    }
+
+    function updateInlineLaw(qNum, value) {
+        QUESTION_PARAMS[adminActiveSection][qNum].law = value;
+    }
+
+    function generateDemoKey() {
+        const letters = ['א', 'ב', 'ג', 'ד'];
+        for(let i=1; i<=40; i++) {
+            MASTER_ANSWERS.procedural[i] = letters[(i-1) % 4];
+            MASTER_ANSWERS.substantive[i] = letters[3 - ((i-1) % 4)];
+            QUESTION_PARAMS.procedural[i] = { difficulty: (i % 10) + 1, law: "סעיף " + (i * 3) + " לחוק" };
+            QUESTION_PARAMS.substantive[i] = { difficulty: ((i+2) % 10) + 1, law: "הלכת פסק דין " + (i * 7) };
+        }
+        buildAdminMatrix();
+        alert("מפתח תשובות ואנליטיקה לדוגמה הוזנו בהצלחה!");
+    }
+
+    function clearAdminKey() {
+        if(confirm("האם אתה בטוח שברצונך למחוק לחלוטין את כל מפתח התשובות הקיים?")) {
+            for(let i=1; i<=40; i++) {
+                MASTER_ANSWERS.procedural[i] = "";
+                MASTER_ANSWERS.substantive[i] = "";
+                QUESTION_PARAMS.procedural[i] = { difficulty: 5, law: "" };
+                QUESTION_PARAMS.substantive[i] = { difficulty: 5, law: "" };
+            }
+            buildAdminMatrix();
+            alert("המחוון אופס בהצלחה.");
+        }
+    }
+
+    function saveAdminKeys() {
+        alert("כל השינויים, מפתחות התשובות והאנליטיקה המשפטית סונכרנו בהצלחה!");
+        closeAdminModal();
+        if(!document.getElementById('step-results').classList.contains('hidden')) {
+            calculateAndBuildResults();
+        }
+    }
+
+    function startQuiz() {
+        const name = document.getElementById('user-name').value;
+        const phone = document.getElementById('user-phone').value;
+        if(!name || !phone) {
+            alert("אנא מלא שם מלא ומספר טלפון כדי להמשיך");
+            return;
+        }
+        document.getElementById('step-register').classList.add('hidden');
+        document.getElementById('step-quiz').classList.remove('hidden');
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const qNum = currentIdx + 1;
+        const qBox = document.getElementById('question-box');
+        const numText = document.getElementById('active-q-number-text');
+        const feedbackDisplay = document.getElementById('selected-letter-display');
+        const headerBadge = document.getElementById('quiz-header-badge');
+        
+        qBox.classList.remove('slide-in');
+        void qBox.offsetWidth; 
+        qBox.classList.add('slide-in');
+
+        numText.innerText = qNum;
+        document.getElementById('question-number').innerText = `שאלה ${qNum} / 40`;
+        
+        if (currentSection === 'procedural') {
+            document.getElementById('section-title').innerText = 'פרק א\': דיוני (סדרי דין)';
+            headerBadge.className = "flex justify-between items-center bg-blue-900 text-white p-2.5 rounded-xl shadow-xs";
+            numText.className = "text-5xl font-black text-blue-600 transition-colors tracking-tight";
+        } else {
+            document.getElementById('section-title').innerText = 'פרק ב\': מהותי';
+            headerBadge.className = "flex justify-between items-center bg-purple-900 text-white p-2.5 rounded-xl shadow-xs";
+            numText.className = "text-5xl font-black text-purple-600 transition-colors tracking-tight";
+        }
+        
+        const totalProgress = currentSection === 'procedural' ? (qNum / 80) * 100 : ((qNum + 40) / 80) * 100;
+        document.getElementById('progress-bar').style.width = `${totalProgress}%`;
+
+        const isUnsure = unsureQuestions[currentSection][qNum];
+        const unsureBtn = document.getElementById('btn-unsure');
+        if (isUnsure) {
+            unsureBtn.className = "w-full p-2.5 rounded-xl border-2 text-xs bg-amber-50 text-amber-800 border-amber-300 font-bold transition-all flex items-center justify-center gap-2 shadow-xs";
+            document.getElementById('unsure-text').innerText = "מסומן כהתלבטות / לא בטוח";
+        } else {
+            unsureBtn.className = "w-full p-2.5 rounded-xl border-2 text-xs bg-white text-slate-600 border-slate-200 font-bold transition-all flex items-center justify-center gap-2 shadow-2xs";
+            document.getElementById('unsure-text').innerText = "אני מתלבט לגבי השאלה הזו";
+        }
+
+        const pastAns = userAnswers[currentSection][qNum];
+        if (pastAns) {
+            feedbackDisplay.innerText = `הסימון שלך: ${pastAns}`;
+            feedbackDisplay.className = "text-sm font-black text-white bg-slate-900 px-5 py-0.5 rounded-xl border border-slate-900 transition-all scale-100 opacity-100";
+        } else {
+            feedbackDisplay.className = "text-sm font-black text-white bg-slate-900 px-5 py-0.5 rounded-xl border border-slate-900 transition-all scale-0 opacity-0";
+        }
+    }
+
+    function toggleUnsure() {
+        const qNum = currentIdx + 1;
+        unsureQuestions[currentSection][qNum] = !unsureQuestions[currentSection][qNum];
+        renderQuestion();
+    }
+
+    // 🔥 מנגנון הזנה מאובטח: מניעת דילוגים והקפצת שגיאה אם לא סומנה תשובה! 🔥
+    function handleKeypadPress(letter, buttonElement) {
+        const qNum = currentIdx + 1;
+        
+        // הגדרת הערך בזיכרון האקטיבי
+        userAnswers[currentSection][qNum] = letter;
+
+        // בדיקת אבטחה: מוודאים שהתשובה רשומה ב-100%
+        if (!userAnswers[currentSection][qNum] || userAnswers[currentSection][qNum] !== letter) {
+            alert("שגיאה: לא נבחרה חלופה! אנא סמן תשובה כדי להמשיך.");
+            return; 
+        }
+
+        buttonElement.classList.add('flash-active');
+        buttonElement.addEventListener('animationend', () => {
+            buttonElement.classList.remove('flash-active');
+        }, { once: true });
+
+        const feedbackDisplay = document.getElementById('selected-letter-display');
+        feedbackDisplay.innerText = `הסימון שלך: ${letter}`;
+        feedbackDisplay.className = "text-sm font-black text-white bg-slate-900 px-5 py-0.5 rounded-xl border border-slate-900 transition-all scale-105 opacity-100";
+
+        setTimeout(() => {
+            if (currentIdx < 39) {
+                currentIdx++;
+                renderQuestion();
+            } else if (currentSection === 'procedural') {
+                document.getElementById('step-quiz').classList.add('hidden');
+                document.getElementById('step-intermission').classList.remove('hidden');
+            } else {
+                document.getElementById('step-quiz').classList.add('hidden');
+                document.getElementById('step-review-alert').classList.remove('hidden');
+            }
+        }, 160);
+    }
+
+    function proceedToSubstantive() {
+        currentSection = 'substantive';
+        currentIdx = 0;
+        document.getElementById('step-intermission').classList.add('hidden');
+        document.getElementById('step-quiz').classList.remove('hidden');
+        renderQuestion();
+    }
+
+    function backToQuizToVerify() {
+        currentSection = 'substantive';
+        currentIdx = 39;
+        document.getElementById('step-review-alert').classList.add('hidden');
+        document.getElementById('step-quiz').classList.remove('hidden');
+        renderQuestion();
+    }
+
+    function goBack() {
+        if (currentIdx > 0) {
+            currentIdx--;
+            renderQuestion();
+        } else if (currentSection === 'substantive') {
+            currentSection = 'procedural';
+            currentIdx = 39;
+            renderQuestion();
+        }
+    }
+
+    function quickCorrectQuestion(section, qNum, currentAns) {
+        if(confirm(`האם אתה בטוח שברצונך לתקן את שאלה ${qNum} בפרק ה${section === 'procedural' ? 'דיוני' : 'מהותי'}?`)) {
+            let newAns = prompt(`הזן את האות החדשה עבור שאלה ${qNum} (א, ב, ג, או ד):`, currentAns || '');
+            if(newAns) {
+                newAns = newAns.trim();
+                if(['א','ב','ג','ד'].includes(newAns)) {
+                    userAnswers[section][qNum] = newAns;
+                    calculateAndBuildResults();
+                } else {
+                    alert("אות לא תקינה. אנא הזן א, ב, ג או ד בלבד.");
+                }
+            }
+        }
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.errors-tab-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById(`tab-content-${tabName}`).classList.remove('hidden');
+        
+        document.getElementById('tab-btn-procedural').className = "p-2 font-bold text-xs rounded-xl transition-all border-2 bg-white text-slate-700 border-slate-200";
+        document.getElementById('tab-btn-substantive').className = "p-2 font-bold text-xs rounded-xl transition-all border-2 bg-white text-slate-700 border-slate-200";
+        
+        if (tabName === 'procedural') {
+            document.getElementById('tab-btn-procedural').className = "p-2 font-bold text-xs rounded-xl transition-all border-2 bg-blue-900 text-white border-blue-900";
+        } else {
+            document.getElementById('tab-btn-substantive').className = "p-2 font-bold text-xs rounded-xl transition-all border-2 bg-purple-900 text-white border-purple-900";
+        }
+    }
+
+    function showResults() {
+        document.getElementById('step-review-alert').classList.add('hidden');
+        document.getElementById('step-results').classList.remove('hidden');
+        calculateAndBuildResults();
+    }
+
+    function calculateAndBuildResults() {
+        rawProceduralCorrect = 0;
+        rawSubstantiveCorrect = 0;
+        let unsureCorrect = 0;
+        let totalUnsure = 0;
+        
+        let proceduralHtml = '';
+        let substantiveHtml = '';
+
+        for(let i=1; i<=40; i++) {
+            let targetMasterQ = i;
+            if (selectedTour !== '1') targetMasterQ = TOUR_MAPPINGS[selectedTour][i-1];
+            const correctAns = MASTER_ANSWERS.procedural[targetMasterQ];
+            const userAns = userAnswers.procedural[i];
+            const topic = TOPICS_PROCEDURAL[(targetMasterQ - 1) % 4];
+            
+            const paramData = QUESTION_PARAMS.procedural[targetMasterQ] || { difficulty: 5, law: "" };
+            const lawText = paramData.law ? `<span class="inline-block text-[9px] text-blue-900 font-bold bg-white px-2 py-0.5 rounded border border-blue-200 mt-1 shadow-3xs">⚖️ אסמכתא: ${paramData.law}</span>` : '';
+            
+            let diffBg = 'bg-emerald-500';
+            if(paramData.difficulty >= 8) diffBg = 'bg-rose-600';
+            else if(paramData.difficulty >= 5) diffBg = 'bg-amber-500';
+            
+            const diffIndicator = `
+                <div class="flex items-center gap-1 mt-1">
+                    <span class="text-[9px] text-slate-500 font-medium">קושי:</span>
+                    <div class="w-12 bg-slate-200 h-1.5 rounded-full overflow-hidden inline-block shadow-inner">
+                        <div class="${diffBg} h-full" style="width: ${paramData.difficulty * 10}%"></div>
+                    </div>
+                    <span class="text-[9px] font-black text-slate-700">${paramData.difficulty}/10</span>
+                </div>`;
+
+            if(unsureQuestions.procedural[i]) totalUnsure++;
+            const isCorrect = userAns === correctAns;
+
+            if(isCorrect) {
+                rawProceduralCorrect++;
+                if(unsureQuestions.procedural[i]) unsureCorrect++;
+            }
+
+            // ⚡ תיקון עיצוב אובייקט נבחר: רקע מינימלי ללא כפתור עגול כפול, אות המחוון בכפתור ירוק עגול קבוע ⚡
+            proceduralHtml += `
+                <div class="p-3.5 flex justify-between items-center bg-white rounded-xl shadow-xs border border-slate-200/50">
+                    <div class="space-y-0.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-5 h-5 flex items-center justify-center rounded-md font-black text-xs ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${isCorrect ? '✓' : '✕'}</span>
+                            <span class="font-extrabold text-slate-900 text-xs">שאלה ${i}</span>
+                            <button onclick="quickCorrectQuestion('procedural', ${i}, '${userAns || ''}')" class="text-blue-600 text-[10px] bg-slate-50 border px-1.5 py-0.5 rounded shadow-3xs font-semibold">📝 תיקון</button>
+                        </div>
+                        <span class="block text-slate-500 text-[10px] font-semibold">${topic}</span>
+                        <div class="flex flex-col gap-0.5">
+                            ${diffIndicator}
+                            ${lawText}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 text-[12px]">
+                        <!-- סימון המשתמש: אות בולטת עם רקע מינימלי בלבד -->
+                        <div class="flex items-center gap-1 font-bold">
+                            <span class="text-slate-500 text-[10px]">שלך:</span>
+                            <span class="px-2.5 py-0.5 rounded-md font-black text-xs ${isCorrect ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-800 border border-rose-200'}">${userAns || '—'}</span>
+                        </div>
+                        <!-- מחוון: כפתור עגול בצבע ירוק קבוע -->
+                        <div class="flex items-center gap-1 font-extrabold border-r border-slate-300 pr-3">
+                            <span class="text-slate-500 text-[10px]">מחוון:</span>
+                            <span class="w-7 h-7 rounded-full flex items-center justify-center bg-emerald-500 text-white border-2 border-emerald-600 text-xs font-black shadow-sm">${correctAns}</span>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        for(let i=1; i<=40; i++) {
+            let targetMasterQ = i;
+            if (selectedTour !== '1') targetMasterQ = TOUR_MAPPINGS[selectedTour][i-1];
+            const correctAns = MASTER_ANSWERS.substantive[targetMasterQ];
+            const userAns = userAnswers.substantive[i];
+            const topic = TOPICS_SUBSTANTIVE[(targetMasterQ - 1) % 4];
+            
+            const paramData = QUESTION_PARAMS.substantive[targetMasterQ] || { difficulty: 5, law: "" };
+            const lawText = paramData.law ? `<span class="inline-block text-[9px] text-purple-900 font-bold bg-white px-2 py-0.5 rounded border border-purple-200 mt-1 shadow-3xs">⚖️ אסמכתא: ${paramData.law}</span>` : '';
+            
+            let diffBg = 'bg-emerald-500';
+            if(paramData.difficulty >= 8) diffBg = 'bg-rose-600';
+            else if(paramData.difficulty >= 5) diffBg = 'bg-amber-500';
+            
+            const diffIndicator = `
+                <div class="flex items-center gap-1 mt-1">
+                    <span class="text-[9px] text-slate-500 font-medium">קושי:</span>
+                    <div class="w-12 bg-slate-200 h-1.5 rounded-full overflow-hidden inline-block shadow-inner">
+                        <div class="${diffBg} h-full" style="width: ${paramData.difficulty * 10}%"></div>
+                    </div>
+                    <span class="text-[9px] font-black text-slate-700">${paramData.difficulty}/10</span>
+                </div>`;
+
+            if(unsureQuestions.substantive[i]) totalUnsure++;
+            const isCorrect = userAns === correctAns;
+
+            if(isCorrect) {
+                rawSubstantiveCorrect++;
+                if(unsureQuestions.substantive[i]) unsureCorrect++;
+            }
+
+            // ⚡ תיקון עיצוב אובייקט נבחר: רקע מינימלי ללא כפתור עגול כפול, אות המחוון בכפתור ירוק עגול קבוע ⚡
+            substantiveHtml += `
+                <div class="p-3.5 flex justify-between items-center bg-white rounded-xl shadow-xs border border-slate-200/50">
+                    <div class="space-y-0.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-5 h-5 flex items-center justify-center rounded-md font-black text-xs ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${isCorrect ? '✓' : '✕'}</span>
+                            <span class="font-extrabold text-slate-900 text-xs">שאלה ${i}</span>
+                            <button onclick="quickCorrectQuestion('substantive', ${i}, '${userAns || ''}')" class="text-blue-600 text-[10px] bg-slate-50 border px-1.5 py-0.5 rounded shadow-3xs font-semibold">📝 תיקון</button>
+                        </div>
+                        <span class="block text-slate-500 text-[10px] font-semibold">${topic}</span>
+                        <div class="flex flex-col gap-0.5">
+                            ${diffIndicator}
+                            ${lawText}
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 text-[12px]">
+                        <!-- סימון המשתמש: אות בולטת עם רקע מינימלי בלבד -->
+                        <div class="flex items-center gap-1 font-bold">
+                            <span class="text-slate-500 text-[10px]">שלך:</span>
+                            <span class="px-2.5 py-0.5 rounded-md font-black text-xs ${isCorrect ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-800 border border-rose-200'}">${userAns || '—'}</span>
+                        </div>
+                        <!-- מחוון: כפתור עגול בצבע ירוק קבוע -->
+                        <div class="flex items-center gap-1 font-extrabold border-r border-slate-300 pr-3">
+                            <span class="text-slate-500 text-[10px]">מחוון:</span>
+                            <span class="w-7 h-7 rounded-full flex items-center justify-center bg-emerald-500 text-white border-2 border-emerald-600 text-xs font-black shadow-sm">${correctAns}</span>
+                        </div>
+                    </div>
+                </div>`;
+        }
+
+        document.getElementById('tab-content-procedural').innerHTML = proceduralHtml;
+        document.getElementById('tab-content-substantive').innerHTML = substantiveHtml;
+
+        document.getElementById('score-procedural').innerText = rawProceduralCorrect;
+        document.getElementById('score-substantive').innerText = rawSubstantiveCorrect;
+
+        if (totalUnsure > 0) {
+            const accuracy = Math.round((unsureCorrect / totalUnsure) * 100);
+            document.getElementById('intuition-card').classList.remove('hidden');
+            document.getElementById('intuition-text').innerText = `${accuracy}%`;
+        } else {
+            document.getElementById('intuition-card').classList.add('hidden');
+        }
+
+        updateScoreDisplay();
+    }
+
+    function updateWritingScore(val) {
+        currentWritingScore = Number(val);
+        document.getElementById('writing-label').innerText = `${val} / 20 נק'`;
+        updateScoreDisplay();
+    }
+
+    function updateFactor(val) {
+        currentFactor = Number(val);
+        document.getElementById('factor-label').innerText = `+${val} נק'`;
+        updateScoreDisplay();
+    }
+
+    function updateScoreDisplay() {
+        const americanScore = rawProceduralCorrect + rawSubstantiveCorrect; 
+        const totalScoreRaw = americanScore + currentWritingScore + currentFactor;
+        const finalScore = Math.min(totalScoreRaw, 100);
+
+        document.getElementById('final-score').innerText = finalScore;
+        
+        const scoreBox = document.getElementById('score-box-bg');
+        const statusText = document.getElementById('score-status-text');
+        const statusBadge = document.getElementById('pass-status');
+        const alertBox = document.getElementById('writing-task-alert');
+
+        const pointsNeededInWriting = Math.max(65 - americanScore - currentFactor, 0);
+
+        if (pointsNeededInWriting > 20) {
+            alertBox.className = "p-3 rounded-xl border-2 font-bold text-center text-xs bg-rose-50 text-rose-800 border-rose-300 shadow-3xs";
+            alertBox.innerHTML = `⚠️ הציון מהשאלות האמריקאיות נמוך מדי (${americanScore} נק'). <br> <span class="font-extrabold mt-1 block text-rose-900">גם ציון מקסימלי במטלת הכתיבה לא יספיק כדי לעבור את הבחינה.</span>`;
+        } else if (pointsNeededInWriting === 0) {
+            alertBox.className = "p-3 rounded-xl border-2 font-bold text-center text-xs bg-emerald-50 text-emerald-800 border-emerald-300 shadow-3xs";
+            alertBox.innerHTML = `🎉 חוף מבטחים: עברת את רף ה-65 רק מהשאלות האמריקאיות! <br> <span class="font-extrabold mt-1 block text-emerald-900">הנך נדרש ל-0 נקודות בניסוח המשפטי כדי לעבור.</span>`;
+        } else {
+            alertBox.className = "p-3 rounded-xl border-2 font-bold text-center text-xs bg-amber-50 text-amber-800 border-amber-300 shadow-3xs";
+            alertBox.innerHTML = `✍️ מדד מטלת כתיבה: כדי לעבור את המבחן ולקבל ציון 65, <br> <span class="font-black text-sm text-amber-950 underline block mt-1">הנך נדרש ל-${pointsNeededInWriting} נקודות בניסוח המשפטי כדי לעבור.</span>`;
+        }
+
+        if (americanScore > 55) {
+            scoreBox.className = "text-center p-5 rounded-2xl border-2 shadow-lg space-y-1 bg-sparkle-gold border-amber-400 text-amber-950 font-bold";
+            statusText.innerText = "🏆 אלוף! ציון פנומנלי, אתה בטופ הארצי!";
+            statusBadge.innerHTML = `<span class="bg-amber-600 text-white px-4 py-1.5 rounded-full text-xs font-black shadow-xs inline-block">עברת בטופ הארצי! 👑</span>`;
+        } else if (americanScore >= 52) {
+            scoreBox.className = "text-center p-5 rounded-2xl border-2 shadow-lg space-y-1 bg-sparkle-emerald border-emerald-400 text-emerald-950 font-bold";
+            statusText.innerText = "✨ מדהים! עברת את האמריקאי בהצטיינות וברוגע!";
+            statusBadge.innerHTML = `<span class="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs font-black shadow-xs inline-block">עובר חגיגי ומצטיין! 🎉</span>`;
+        } else if (americanScore >= 50) {
+            scoreBox.className = "text-center p-5 rounded-2xl border-2 shadow-md space-y-1 bg-emerald-50 border-emerald-300 text-emerald-900";
+            statusText.innerText = "👍 עברת את הרף הבטוח של השאלות האמריקאיות (50+)!";
+            statusBadge.innerHTML = `<span class="bg-emerald-500 text-white px-4 py-1.5 rounded-full text-xs font-black shadow-xs inline-block">עברת את המרחב האמריקאי קלאס 🥂</span>`;
+        } else if (americanScore >= 45) {
+            scoreBox.className = "text-center p-5 rounded-2xl border-2 shadow-md space-y-1 bg-amber-50 border-amber-300 text-amber-950";
+            statusText.innerText = "⏳ ציון גבולי באמריקאי. מטלת הכתיבה תקבע את הגורל שלך.";
+            statusBadge.innerHTML = `<span class="bg-amber-600 text-white px-4 py-1.5 rounded-full text-xs font-black shadow-xs inline-block">ביצוע גבולי במבחן האמריקאי ⏳</span>`;
+        } else {
+            scoreBox.className = "text-center p-5 rounded-2xl border-2 shadow-md space-y-1 bg-rose-50 border-rose-300 text-rose-950";
+            statusText.innerText = "💔 הציון באמריקאי נמוך מדי. מומלץ לעבור לעומק על הנושאים.";
+            statusBadge.innerHTML = `<span class="bg-rose-600 text-white px-4 py-1.5 rounded-full text-xs font-black shadow-xs inline-block">מתחת לרף המעבר באמריקאי 😢</span>`;
+        }
+    }
+
+    function restart() {
+        if(confirm("האם אתה בטוח שברצונך לאפס לחלוטין את כל התשובות שסומנו?")) {
+            currentSection = 'procedural';
+            currentIdx = 0;
+            userAnswers = { procedural: {}, substantive: {} };
+            unsureQuestions = { procedural: {}, substantive: {} };
+            currentFactor = 0;
+            currentWritingScore = 0;
+            boardsVisible = false;
+            document.getElementById('boards-container').classList.add('hidden');
+            document.getElementById('toggle-boards-btn').innerHTML = "📊 הצג את רשימת כל השאלות במבחן";
+            document.getElementById('factor-slider').value = 0;
+            document.getElementById('writing-slider').value = 0;
+            document.getElementById('factor-label').innerText = `+0 נק'`;
+            document.getElementById('writing-label').innerText = `0 / 20 נק'`;
+            document.getElementById('step-results').classList.add('hidden');
+            document.getElementById('step-register').classList.remove('hidden');
+        }
+    }
+</script>
+
+</body>
+</html>

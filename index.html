@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>בדיקה מהירה v1.4.4</title>
+    <title>בדיקה מהירה v1.5.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,36 +40,56 @@
 
         .letter-keypad {
             display: flex;
-            border-radius: 1rem;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+            gap: 0.45rem;
+            padding: 0.2rem;
+            overflow: visible;
         }
         .letter-btn {
             flex: 1;
-            padding: 1.1rem 0;
-            font-size: 1.75rem;
+            padding: 1rem 0;
+            font-size: 1.65rem;
             font-weight: 900;
             color: #fff;
             border: none;
-            transition: transform 0.08s ease, filter 0.08s ease;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+            border-radius: 1rem;
+            transition: transform 0.08s ease, filter 0.08s ease, box-shadow 0.08s ease;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-        .letter-btn:active { transform: scale(0.94); filter: brightness(1.15); }
+        .letter-btn:active { transform: scale(0.92); filter: brightness(1.1); }
         .letter-btn-a {
-            background: linear-gradient(160deg, #3b82f6 0%, #1d4ed8 100%);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 0 18px rgba(59,130,246,0.55);
+            background: linear-gradient(160deg, #93c5fd 0%, #60a5fa 45%, #3b82f6 100%);
+            box-shadow: 0 4px 14px rgba(59,130,246,0.45), 0 0 22px rgba(96,165,250,0.5), inset 0 1px 0 rgba(255,255,255,0.45);
         }
         .letter-btn-b {
-            background: linear-gradient(160deg, #10b981 0%, #047857 100%);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 0 18px rgba(16,185,129,0.55);
+            background: linear-gradient(160deg, #6ee7b7 0%, #34d399 45%, #10b981 100%);
+            box-shadow: 0 4px 14px rgba(16,185,129,0.45), 0 0 22px rgba(52,211,153,0.5), inset 0 1px 0 rgba(255,255,255,0.45);
         }
         .letter-btn-g {
-            background: linear-gradient(160deg, #f59e0b 0%, #b45309 100%);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 0 18px rgba(245,158,11,0.55);
+            background: linear-gradient(160deg, #fcd34d 0%, #fbbf24 45%, #f59e0b 100%);
+            box-shadow: 0 4px 14px rgba(245,158,11,0.45), 0 0 22px rgba(251,191,36,0.5), inset 0 1px 0 rgba(255,255,255,0.45);
         }
         .letter-btn-d {
-            background: linear-gradient(160deg, #8b5cf6 0%, #6d28d9 100%);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 0 18px rgba(139,92,246,0.55);
+            background: linear-gradient(160deg, #c4b5fd 0%, #a78bfa 45%, #8b5cf6 100%);
+            box-shadow: 0 4px 14px rgba(139,92,246,0.45), 0 0 22px rgba(167,139,250,0.5), inset 0 1px 0 rgba(255,255,255,0.45);
+        }
+        #question-box {
+            border: 2px solid transparent;
+            transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+        #question-box.q-bg-procedural {
+            background: linear-gradient(145deg, #f0f9ff 0%, #dbeafe 55%, #e0f2fe 100%);
+            border-color: #93c5fd;
+            box-shadow: 0 4px 22px rgba(59,130,246,0.14), inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        #question-box.q-bg-substantive {
+            background: linear-gradient(145deg, #faf5ff 0%, #ede9fe 55%, #f3e8ff 100%);
+            border-color: #c4b5fd;
+            box-shadow: 0 4px 22px rgba(124,58,237,0.14), inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+        .result-row-correct {
+            border: 1.5px solid #34d399 !important;
+            box-shadow: 0 0 12px rgba(52, 211, 153, 0.38), inset 0 0 0 1px rgba(167, 243, 208, 0.35) !important;
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 85%) !important;
         }
 
         .answer-letter {
@@ -134,19 +154,21 @@
             animation: shine 3s ease infinite;
         }
         .phone-digit {
-            width: 2.25rem;
-            height: 2.75rem;
+            width: 1.55rem;
+            height: 2.1rem;
             text-align: center;
             font-weight: 800;
-            font-size: 1.125rem;
+            font-size: 0.95rem;
             border: 2px solid #cbd5e1;
-            border-radius: 0.5rem;
+            border-radius: 0.4rem;
             outline: none;
             background: #fff;
             color: #0f172a;
+            padding: 0;
         }
-        .phone-digit:focus { border-color: #1e3a5f; box-shadow: 0 0 0 3px rgba(30,58,95,0.15); }
-        .phone-prefix { width: 2rem; }
+        .phone-digit:focus { border-color: #1e3a5f; box-shadow: 0 0 0 2px rgba(30,58,95,0.12); }
+        .phone-prefix { width: 1.45rem; }
+        .phone-row { gap: 0.2rem !important; max-width: 11.5rem; margin-inline: auto; }
 
         .app-footer {
             text-align: center;
@@ -281,48 +303,76 @@
             background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
             box-shadow: 0 4px 14px rgba(15, 23, 42, 0.35);
         }
-        .btn-guest {
-            background: #fff;
-            border: 2px solid #cbd5e1;
-            color: #334155;
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+        .btn-primary:disabled {
+            opacity: 0.38;
+            cursor: not-allowed;
+            box-shadow: none;
         }
-        .btn-guest:hover { background: #f8fafc; border-color: #94a3b8; }
-        .btn-locked {
-            opacity: 0.42 !important;
+        .login-actions {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            gap: 0.45rem;
+            max-width: 14rem;
+            margin-inline: auto;
+            margin-top: 0.5rem;
+        }
+        .btn-login-main {
+            flex: 1;
+            min-width: 0;
+            padding: 0.75rem 0.5rem;
+            border-radius: 0.75rem;
+            font-weight: 800;
+            font-size: 0.85rem;
+        }
+        .btn-login-guest {
+            flex: 0 0 auto;
+            padding: 0.75rem 0.65rem;
+            border-radius: 0.75rem;
+            font-weight: 800;
+            font-size: 0.72rem;
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+            border: 2px solid #fdba74;
+            color: #9a3412;
+            box-shadow: 0 2px 10px rgba(251,146,60,0.2);
+            white-space: nowrap;
+        }
+        .btn-login-guest:active { transform: scale(0.98); }
+        .guest-feature-locked {
+            position: relative;
             cursor: not-allowed !important;
-            filter: grayscale(0.55);
             pointer-events: none;
         }
-        .guest-mode-banner {
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-            border: 2px dashed #94a3b8;
-            border-radius: 0.875rem;
-            padding: 0.65rem 0.75rem;
-            text-align: center;
-            font-size: 0.72rem;
-            font-weight: 800;
-            color: #475569;
-            line-height: 1.45;
-        }
-        .guest-lock-overlay {
-            display: none;
+        .guest-lock-badge {
             position: absolute;
-            inset: 0;
-            z-index: 5;
-            background: rgba(248, 250, 252, 0.82);
-            border-radius: inherit;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 0.75rem;
-            font-size: 0.7rem;
-            font-weight: 800;
-            color: #64748b;
-            line-height: 1.4;
+            top: -0.35rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            border: 1.5px solid #f59e0b;
+            color: #b45309;
+            font-size: 0.55rem;
+            font-weight: 900;
+            padding: 0.1rem 0.35rem;
+            border-radius: 9999px;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(245,158,11,0.25);
+            line-height: 1.2;
         }
-        .panel-guest-locked .guest-lock-overlay { display: flex; }
-        .panel-guest-locked input[type="range"] { pointer-events: none; opacity: 0.35; }
+        .guest-row-lock {
+            display: none;
+            font-size: 0.62rem;
+            font-weight: 900;
+            color: #b45309;
+            background: #fffbeb;
+            border: 1.5px solid #fcd34d;
+            border-radius: 9999px;
+            padding: 0.12rem 0.45rem;
+            margin-bottom: 0.25rem;
+            width: fit-content;
+        }
+        .panel-guest-locked .guest-row-lock { display: inline-flex; align-items: center; gap: 0.15rem; }
+        .panel-guest-locked input[type="range"] { pointer-events: none; }
     </style>
 </head>
 <body class="text-slate-900 min-h-screen flex flex-col items-center justify-start antialiased p-0 sm:p-4 sm:py-6">
@@ -335,7 +385,7 @@
             <h1 class="text-lg font-extrabold tracking-tight leading-snug">בדיקה מהירה של מבחני לשכה</h1>
             <p class="text-[11px] text-amber-200/90 font-semibold mt-1">בדיקת מבחן לשכה 23/06/2026</p>
             <p id="user-greeting" class="hidden text-sm text-amber-200 font-bold mt-1.5"></p>
-            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.4.4</span></p>
+            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.5.0</span></p>
         </div>
 
         <!-- 🔒 לוח בקרה למנהל המשולב בשורה אחת חסרת סרבול 🔒 -->
@@ -367,11 +417,6 @@
 
             <!-- מסך 1: רישום ובחירת טור -->
             <div id="step-register" class="space-y-4">
-                <div class="welcome-card p-3 rounded-l-xl text-center">
-                    <h2 class="text-xs font-bold text-slate-900">בדיקה מהירה של מבחני לשכה</h2>
-                    <p class="text-[11px] text-slate-600 mt-0.5">בדיקת מבחן לשכה 23/06/2026</p>
-                </div>
-
                 <div id="demo-key-notice-welcome" class="demo-key-banner hidden" role="alert">
                     <strong>⚠️ שים לב — טרם הוזנו נתוני אמת</strong>
                     מפתח התשובות הנוכחי הוא לדוגמה בלבד. הציון והמחוון אינם סופיים עד להזנת פתרון המבחן האמיתי.
@@ -384,7 +429,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 text-slate-800">מספר טלפון</label>
-                        <div class="flex items-center gap-1 justify-center" dir="ltr">
+                        <div class="flex items-center phone-row justify-center" dir="ltr">
                             <input type="tel" maxlength="1" inputmode="numeric" class="phone-digit phone-prefix" data-phone-group="prefix" data-phone-idx="0" aria-label="ספרת קידומת 1" />
                             <input type="tel" maxlength="1" inputmode="numeric" class="phone-digit phone-prefix" data-phone-group="prefix" data-phone-idx="1" aria-label="ספרת קידומת 2" />
                             <input type="tel" maxlength="1" inputmode="numeric" class="phone-digit phone-prefix" data-phone-group="prefix" data-phone-idx="2" aria-label="ספרת קידומת 3" />
@@ -412,9 +457,10 @@
                         </div>
                     </div>
                 </div>
-                <button onclick="startQuiz()" class="w-full btn-primary hover:opacity-95 text-white p-3.5 rounded-xl font-bold text-sm transition-all active:scale-[0.99] mt-2">המשך עם פרטים (גישה מלאה) ←</button>
-                <button type="button" onclick="startQuizAsGuest()" class="w-full btn-guest hover:opacity-95 p-3 rounded-xl font-bold text-sm transition-all active:scale-[0.99]">👤 המשך כאורח — ללא שם וטלפון</button>
-                <p class="text-[10px] text-slate-500 text-center font-medium leading-relaxed">במצב אורח: תרגול והצגת ציון בסיסי בלבד.<br>שיתוף, צילום וסימולטור ניסוח/פקטור נעולים.</p>
+                <div class="login-actions">
+                    <button type="button" id="btn-login" onclick="startQuiz()" disabled class="btn-login-main btn-primary hover:opacity-95 text-white transition-all active:scale-[0.99]">כניסה</button>
+                    <button type="button" id="btn-login-guest" onclick="startQuizAsGuest()" class="btn-login-guest transition-all">כניסה כאורח</button>
+                </div>
             </div>
 
             <!-- מסך ביניים 1 -->
@@ -467,7 +513,7 @@
                     <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
                 </div>
 
-                <div id="question-box" class="relative py-4 text-center bg-gradient-to-b from-slate-50 to-white rounded-2xl border border-slate-200 flex flex-col justify-center items-center min-h-[120px] shadow-inner">
+                <div id="question-box" class="relative py-4 text-center rounded-2xl flex flex-col justify-center items-center min-h-[120px] q-bg-procedural">
                     <div class="flex items-center justify-center gap-2 flex-wrap">
                         <span class="text-xl font-bold text-slate-500">שאלה</span>
                         <span id="active-q-number-text" class="text-5xl font-black transition-colors duration-300 tracking-tight">1</span>
@@ -498,11 +544,6 @@
             <div id="step-results" class="space-y-4 hidden animate-fade-in">
                 
                 <!-- כפתורי הפעולה בראש העמוד -->
-                <div id="guest-mode-notice-results" class="guest-mode-banner hidden" role="status">
-                    👤 מצב אורח פעיל — שיתוף, צילום וסימולטור ניסוח/פקטור נעולים.<br>
-                    <span class="text-slate-600 font-semibold">להפעלת כל היכולות: הירשם עם שם וטלפון במסך הכניסה.</span>
-                </div>
-
                 <div class="grid grid-cols-3 gap-2 py-1">
                     <button type="button" id="btn-print" onclick="printResults()" class="p-2.5 bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md hover:bg-slate-700 transition-colors flex items-center justify-center gap-1">
                         <span>📸</span> צילום
@@ -554,12 +595,9 @@
                 <div id="writing-task-alert" class="p-3 rounded-xl border-2 font-bold text-center text-xs shadow-2xs"></div>
 
                 <!-- שני סליידרים חיים -->
-                <div id="sliders-panel" class="relative bg-slate-50 p-3.5 rounded-xl border-2 border-slate-200 space-y-3">
-                    <div id="guest-lock-sliders-overlay" class="guest-lock-overlay" aria-hidden="true">
-                        🔒 נעול במצב אורח<br>
-                        <span class="font-semibold text-slate-500">ניסוח משפטי ופקטור — לאחר הרשמה</span>
-                    </div>
-                    <div class="space-y-1">
+                <div id="sliders-panel" class="relative bg-gradient-to-b from-slate-50 to-blue-50/40 p-3.5 rounded-xl border-2 border-slate-200 space-y-3">
+                    <div class="space-y-1 slider-row">
+                        <span class="guest-row-lock">🔒 נעול במצב אורח</span>
                         <div class="flex justify-between text-xs font-extrabold text-slate-700">
                             <span>✍️ ציון מטלת ניסוח (כתיבה):</span>
                             <span id="writing-label" class="text-blue-600 font-black">0 / 20 נק'</span>
@@ -567,7 +605,8 @@
                         <input type="range" id="writing-slider" min="0" max="20" value="0" oninput="updateWritingScore(this.value)" class="w-full accent-blue-600 h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer">
                     </div>
                     
-                    <div class="space-y-1 pt-2 border-t border-slate-200">
+                    <div class="space-y-1 pt-2 border-t border-slate-200 slider-row">
+                        <span class="guest-row-lock">🔒 נעול במצב אורח</span>
                         <div class="flex justify-between text-xs font-extrabold text-slate-700">
                             <span>⚖️ סימולטור פקטור (נקודות):</span>
                             <span id="factor-label" class="text-purple-600 font-black">+0 נק'</span>
@@ -607,13 +646,13 @@
 
         <footer class="app-footer mt-auto shrink-0">
             <div>יישומון זה נבנה על ידי <span class="ye-brand">YE</span> ©</div>
-            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.4.4</div>
+            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.5.0</div>
         </footer>
 
     </div>
 
 <script>
-    const APP_VERSION = '1.4.4';
+    const APP_VERSION = '1.5.0';
     /** שנה ל-false לאחר הזנת מפתח תשובות אמיתי במסך ניהול */
     const DEMO_ANSWER_KEY_ACTIVE = true;
 
@@ -648,17 +687,28 @@
         } catch (e) { /* ignore */ }
     }
 
+    function setGuestLockBadge(el, locked) {
+        if (!el) return;
+        el.classList.toggle('guest-feature-locked', locked);
+        let badge = el.querySelector('.guest-lock-badge');
+        if (locked && !badge) {
+            badge = document.createElement('span');
+            badge.className = 'guest-lock-badge';
+            badge.textContent = '🔒 נעול במצב אורח';
+            el.appendChild(badge);
+        }
+        if (badge) badge.style.display = locked ? '' : 'none';
+    }
+
     function updateGuestFeatureLocks() {
         const guest = isGuestSession;
         const printBtn = document.getElementById('btn-print');
         const shareBtn = document.getElementById('btn-share');
         const slidersPanel = document.getElementById('sliders-panel');
-        const guestNotice = document.getElementById('guest-mode-notice-results');
-        const lockOverlay = document.getElementById('guest-lock-sliders-overlay');
 
         [printBtn, shareBtn].forEach(btn => {
             if (!btn) return;
-            btn.classList.toggle('btn-locked', guest);
+            setGuestLockBadge(btn, guest);
             btn.setAttribute('aria-disabled', guest ? 'true' : 'false');
         });
 
@@ -668,8 +718,6 @@
         });
 
         if (slidersPanel) slidersPanel.classList.toggle('panel-guest-locked', guest);
-        if (lockOverlay) lockOverlay.setAttribute('aria-hidden', guest ? 'false' : 'true');
-        if (guestNotice) guestNotice.classList.toggle('hidden', !guest);
 
         if (guest) {
             currentWritingScore = 0;
@@ -689,7 +737,7 @@
 
     function requireRegisteredFeature(featureName) {
         if (!isGuestSession) return true;
-        alert(`🔒 ${featureName} זמין רק לאחר הרשמה עם שם וטלפון.\n\nחזור למסך הכניסה ובחר "המשך עם פרטים".`);
+        alert(`🔒 ${featureName} — נעול במצב אורח.\n\nחזור למסך הכניסה, מלא פרטים ולחץ "כניסה".`);
         return false;
     }
 
@@ -751,12 +799,14 @@
         if (!session) {
             isGuestSession = false;
             updateGuestFeatureLocks();
+            validateLoginForm();
             return;
         }
         isGuestSession = !!session.isGuest;
         if (session.isGuest) {
             updateHeaderUser();
             updateGuestFeatureLocks();
+            validateLoginForm();
             return;
         }
         const nameEl = document.getElementById('user-name');
@@ -774,6 +824,7 @@
         }
         updateHeaderUser();
         updateGuestFeatureLocks();
+        validateLoginForm();
     }
 
     function logout() {
@@ -1044,11 +1095,28 @@
         return getPhoneDigits('prefix') + getPhoneDigits('body');
     }
 
+    function validateLoginForm() {
+        const name = document.getElementById('user-name')?.value.trim() || '';
+        const phone = getFullPhone();
+        const btn = document.getElementById('btn-login');
+        if (btn) btn.disabled = !(name.length > 0 && phone.length === 10);
+    }
+
+    function initLoginFormValidation() {
+        const nameEl = document.getElementById('user-name');
+        if (nameEl) {
+            nameEl.addEventListener('input', validateLoginForm);
+            nameEl.addEventListener('change', validateLoginForm);
+        }
+        validateLoginForm();
+    }
+
     function initPhoneInputs() {
         const all = [...document.querySelectorAll('.phone-digit')];
         all.forEach((cell, globalIdx) => {
             cell.addEventListener('input', () => {
                 cell.value = cell.value.replace(/\D/g, '').slice(-1);
+                validateLoginForm();
                 if (cell.value) {
                     const group = cell.dataset.phoneGroup;
                     const idx = Number(cell.dataset.phoneIdx);
@@ -1058,6 +1126,9 @@
                 }
             });
             cell.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace') {
+                    requestAnimationFrame(validateLoginForm);
+                }
                 if (e.key === 'Backspace' && !cell.value) {
                     const group = cell.dataset.phoneGroup;
                     const idx = Number(cell.dataset.phoneIdx);
@@ -1077,6 +1148,7 @@
                     i++;
                 }
                 all[Math.min(i, all.length - 1)]?.focus();
+                validateLoginForm();
             });
         });
     }
@@ -1271,18 +1343,25 @@
         numText.innerText = qNum;
         document.getElementById('question-number').innerText = `שאלה ${qNum} / 40`;
         
+        const progressBar = document.getElementById('progress-bar');
         if (currentSection === 'procedural') {
             document.getElementById('section-title').innerText = 'פרק א\': דיוני (סדרי דין)';
             headerBadge.className = "flex justify-between items-center bg-blue-900 text-white p-2.5 rounded-xl shadow-xs";
-            numText.className = "text-5xl font-black text-blue-600 transition-colors tracking-tight";
+            numText.className = "text-5xl font-black text-blue-500 transition-colors tracking-tight";
+            qBox.classList.remove('q-bg-substantive');
+            qBox.classList.add('q-bg-procedural');
+            if (progressBar) progressBar.className = 'bg-blue-500 h-full transition-all duration-300';
         } else {
             document.getElementById('section-title').innerText = 'פרק ב\': מהותי';
             headerBadge.className = "flex justify-between items-center bg-purple-900 text-white p-2.5 rounded-xl shadow-xs";
-            numText.className = "text-5xl font-black text-purple-600 transition-colors tracking-tight";
+            numText.className = "text-5xl font-black text-purple-500 transition-colors tracking-tight";
+            qBox.classList.remove('q-bg-procedural');
+            qBox.classList.add('q-bg-substantive');
+            if (progressBar) progressBar.className = 'bg-purple-500 h-full transition-all duration-300';
         }
         
         const totalProgress = currentSection === 'procedural' ? (qNum / 80) * 100 : ((qNum + 40) / 80) * 100;
-        document.getElementById('progress-bar').style.width = `${totalProgress}%`;
+        if (progressBar) progressBar.style.width = `${totalProgress}%`;
 
         const isUnsure = unsureQuestions[currentSection][qNum];
         const unsureBtn = document.getElementById('btn-unsure');
@@ -1459,7 +1538,7 @@
 
             // ⚡ תיקון עיצוב אובייקט נבחר: רקע מינימלי ללא כפתור עגול כפול, אות המחוון בכפתור ירוק עגול קבוע ⚡
             proceduralHtml += `
-                <div class="p-3.5 flex justify-between items-center bg-white rounded-xl shadow-xs border border-slate-200/50">
+                <div class="p-3.5 flex justify-between items-center bg-white rounded-xl shadow-xs border border-slate-200/50${isCorrect ? ' result-row-correct' : ''}">
                     <div class="space-y-0.5">
                         <div class="flex items-center gap-2">
                             <span class="w-5 h-5 flex items-center justify-center rounded-md font-black text-xs ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${isCorrect ? '✓' : '✕'}</span>
@@ -1520,7 +1599,7 @@
 
             // ⚡ תיקון עיצוב אובייקט נבחר: רקע מינימלי ללא כפתור עגול כפול, אות המחוון בכפתור ירוק עגול קבוע ⚡
             substantiveHtml += `
-                <div class="p-3.5 flex justify-between items-center bg-white rounded-xl shadow-xs border border-slate-200/50">
+                <div class="p-3.5 flex justify-between items-center bg-white rounded-xl shadow-xs border border-slate-200/50${isCorrect ? ' result-row-correct' : ''}">
                     <div class="space-y-0.5">
                         <div class="flex items-center gap-2">
                             <span class="w-5 h-5 flex items-center justify-center rounded-md font-black text-xs ${isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${isCorrect ? '✓' : '✕'}</span>
@@ -1650,6 +1729,7 @@
     }
 
     initPhoneInputs();
+    initLoginFormValidation();
     restoreSessionToForm();
     updateDemoKeyNotices();
     updateGuestFeatureLocks();

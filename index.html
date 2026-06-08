@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>מתקתק לשכה v1.3.1</title>
+    <title>בדיקה מהירה v1.4.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -150,6 +150,37 @@
             background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
             border-right: 4px solid #c9a227;
         }
+        .login-field-narrow {
+            width: 100%;
+            max-width: 13rem;
+            margin-inline: auto;
+            text-align: center;
+        }
+        .login-block-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #save-warn {
+            display: none;
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #b91c1c;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 0.5rem;
+            padding: 0.35rem 0.5rem;
+            margin-top: 0.25rem;
+        }
+        #save-warn.visible { display: block; }
+        #quiz-capture {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
         .btn-primary {
             background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
             box-shadow: 0 4px 14px rgba(15, 23, 42, 0.35);
@@ -165,9 +196,10 @@
         <div class="app-header p-4 text-center text-white shrink-0 shadow-md relative">
             <button onclick="openAdminModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white text-xs bg-white/10 p-1.5 rounded-lg transition-colors">🔒 ניהול</button>
             <button type="button" id="btn-logout" onclick="logout()" class="hidden absolute left-4 top-4 text-rose-200 hover:text-white text-xs bg-white/10 hover:bg-rose-500/30 px-2 py-1.5 rounded-lg transition-colors font-bold">🚪 התנתק</button>
-            <h1 class="text-xl font-extrabold tracking-tight">⚖️ מתקתק לשכה</h1>
+            <h1 class="text-lg font-extrabold tracking-tight leading-snug">בדיקה מהירה של מבחני לשכה</h1>
+            <p class="text-[11px] text-amber-200/90 font-semibold mt-1">בדיקת מבחן לשכה 23/06/2026</p>
             <p id="user-greeting" class="hidden text-sm text-amber-200 font-bold mt-1.5"></p>
-            <p class="text-[11px] text-slate-300 font-medium mt-0.5">חישוב סימולטני כולל מטלת ניסוח · <span class="text-amber-300 font-bold">v1.3.1</span></p>
+            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.4.0</span></p>
         </div>
 
         <!-- 🔒 לוח בקרה למנהל המשולב בשורה אחת חסרת סרבול 🔒 -->
@@ -199,15 +231,15 @@
 
             <!-- מסך 1: רישום ובחירת טור -->
             <div id="step-register" class="space-y-4">
-                <div class="welcome-card p-3 rounded-l-xl">
-                    <h2 class="text-xs font-bold text-slate-900">ברוכים הבאים לסימולטור הלשכה</h2>
-                    <p class="text-[11px] text-slate-600 mt-0.5">הזינו פרטים ותקתקו את התשובות שלכם.</p>
+                <div class="welcome-card p-3 rounded-l-xl text-center">
+                    <h2 class="text-xs font-bold text-slate-900">בדיקה מהירה של מבחני לשכה</h2>
+                    <p class="text-[11px] text-slate-600 mt-0.5">בדיקת מבחן לשכה 23/06/2026</p>
                 </div>
                 
                 <div class="space-y-3">
-                    <div>
+                    <div class="login-block-center">
                         <label class="block text-xs font-bold mb-1 text-slate-800">שם מלא</label>
-                        <input type="text" id="user-name" class="w-full p-2.5 border-2 border-slate-200 rounded-xl outline-none focus:border-slate-900 font-medium text-slate-900 bg-white" placeholder="ישראל ישראלי">
+                        <input type="text" id="user-name" class="login-field-narrow p-2.5 border-2 border-slate-200 rounded-xl outline-none focus:border-slate-900 font-medium text-slate-900 bg-white" placeholder="ישראל ישראלי">
                     </div>
                     <div>
                         <label class="block text-xs font-bold mb-1 text-slate-800">מספר טלפון</label>
@@ -277,6 +309,8 @@
 
             <!-- מסך 2: תקתוק שאלות -->
             <div id="step-quiz" class="space-y-3 hidden">
+                <input type="text" id="quiz-capture" autocomplete="off" autocorrect="off" spellcheck="false" aria-hidden="true" tabindex="-1" />
+                <div id="save-warn">⚠️ התשובה לא נשמרה — לחץ שוב על האות</div>
                 <div id="quiz-header-badge" class="flex justify-between items-center text-white p-2.5 rounded-xl shadow-xs">
                     <span id="section-title" class="text-[11px] font-bold uppercase tracking-wider">פרק: דיוני</span>
                     <span id="question-number" class="text-[11px] font-black bg-white/20 px-2 py-0.5 rounded-md">שאלה 1 / 40</span>
@@ -410,13 +444,13 @@
 
         <footer class="app-footer mt-auto shrink-0">
             <div>יישומון זה נבנה על ידי <span class="ye-brand">YE</span> ©</div>
-            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.3.1</div>
+            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.4.0</div>
         </footer>
 
     </div>
 
 <script>
-    const APP_VERSION = '1.3.1';
+    const APP_VERSION = '1.4.0';
     const SESSION_KEY = 'mitkatek_lishka_user';
 
     const LETTER_FLASH_BG = { 'א': 'flash-bg-a', 'ב': 'flash-bg-b', 'ג': 'flash-bg-g', 'ד': 'flash-bg-d' };
@@ -494,19 +528,22 @@
     function showLetterPop(letter, onDone) {
         const flash = document.getElementById('letter-flash');
         if (!flash) { if (onDone) onDone(); return; }
-        flash.className = LETTER_FLASH_BG[letter] || '';
-        flash.textContent = letter;
-        flash.setAttribute('aria-hidden', 'false');
-        void flash.offsetWidth;
-        flash.classList.add('flash-show');
+        let finished = false;
         const finish = () => {
+            if (finished) return;
+            finished = true;
             flash.classList.remove('flash-show');
             flash.textContent = '';
             flash.setAttribute('aria-hidden', 'true');
             if (onDone) onDone();
         };
+        flash.className = LETTER_FLASH_BG[letter] || '';
+        flash.textContent = letter;
+        flash.setAttribute('aria-hidden', 'false');
+        void flash.offsetWidth;
+        flash.classList.add('flash-show');
         flash.addEventListener('animationend', finish, { once: true });
-        setTimeout(finish, 520);
+        setTimeout(finish, 500);
     }
 
     let MASTER_ANSWERS = {
@@ -538,6 +575,124 @@
     let boardsVisible = false;
     let adminActiveSection = 'procedural';
     let quizBusy = false;
+    let letterQueue = [];
+
+    function showSaveWarn(show) {
+        const el = document.getElementById('save-warn');
+        if (el) el.classList.toggle('visible', !!show);
+    }
+
+    function getMissingAnswers(section) {
+        const missing = [];
+        for (let i = 1; i <= 40; i++) {
+            if (!userAnswers[section][i]) missing.push(i);
+        }
+        return missing;
+    }
+
+    function saveAnswerAtCurrent(norm) {
+        const qNum = currentIdx + 1;
+        userAnswers[currentSection][qNum] = norm;
+        return userAnswers[currentSection][qNum] === norm;
+    }
+
+    function enqueueLetter(letter) {
+        const norm = normalizeQuizLetter(letter);
+        if (!norm) return;
+        letterQueue.push(norm);
+        processLetterQueue();
+    }
+
+    function processLetterQueue() {
+        if (quizBusy || letterQueue.length === 0) return;
+        quizBusy = true;
+        showSaveWarn(false);
+
+        const norm = letterQueue.shift();
+        const qNum = currentIdx + 1;
+
+        if (!saveAnswerAtCurrent(norm)) {
+            letterQueue.unshift(norm);
+            quizBusy = false;
+            showSaveWarn(true);
+            processLetterQueue();
+            return;
+        }
+
+        showLetterPop(norm, () => {
+            if (userAnswers[currentSection][qNum] !== norm) {
+                userAnswers[currentSection][qNum] = norm;
+            }
+            if (userAnswers[currentSection][qNum] !== norm) {
+                showSaveWarn(true);
+                quizBusy = false;
+                processLetterQueue();
+                return;
+            }
+            tryAdvanceAfterAnswer(qNum);
+            quizBusy = false;
+            processLetterQueue();
+        });
+    }
+
+    function tryAdvanceAfterAnswer(answeredQNum) {
+        if (!userAnswers[currentSection][answeredQNum]) {
+            showSaveWarn(true);
+            return;
+        }
+
+        if (currentIdx < 39) {
+            currentIdx++;
+            renderQuestion();
+            return;
+        }
+
+        const missing = getMissingAnswers(currentSection);
+        if (missing.length > 0) {
+            alert(`חסרות ${missing.length} תשובות — מעבר לשאלה ${missing[0]}`);
+            currentIdx = missing[0] - 1;
+            renderQuestion();
+            return;
+        }
+
+        if (currentSection === 'procedural') {
+            document.getElementById('step-quiz').classList.add('hidden');
+            document.getElementById('step-intermission').classList.remove('hidden');
+        } else {
+            const missProc = getMissingAnswers('procedural');
+            if (missProc.length > 0) {
+                alert(`חסרות ${missProc.length} תשובות בדיוני — לא ניתן לסיים`);
+                currentSection = 'procedural';
+                currentIdx = missProc[0] - 1;
+                document.getElementById('step-review-alert').classList.add('hidden');
+                document.getElementById('step-quiz').classList.remove('hidden');
+                renderQuestion();
+                return;
+            }
+            document.getElementById('step-quiz').classList.add('hidden');
+            document.getElementById('step-review-alert').classList.remove('hidden');
+        }
+    }
+
+    function focusQuizCapture() {
+        requestAnimationFrame(() => {
+            const cap = document.getElementById('quiz-capture');
+            if (cap && !document.getElementById('step-quiz').classList.contains('hidden')) {
+                cap.focus({ preventScroll: true });
+            }
+        });
+    }
+
+    function initQuizCapture() {
+        const cap = document.getElementById('quiz-capture');
+        if (!cap || cap.dataset.ready) return;
+        cap.dataset.ready = '1';
+        cap.addEventListener('input', () => {
+            const val = cap.value;
+            cap.value = '';
+            for (const ch of val) enqueueLetter(ch);
+        });
+    }
 
     function getPhoneDigits(group) {
         return [...document.querySelectorAll(`[data-phone-group="${group}"]`)].map(el => el.value.replace(/\D/g, '')).join('');
@@ -590,16 +745,7 @@
     }
 
     function advanceAfterAnswer() {
-        if (currentIdx < 39) {
-            currentIdx++;
-            renderQuestion();
-        } else if (currentSection === 'procedural') {
-            document.getElementById('step-quiz').classList.add('hidden');
-            document.getElementById('step-intermission').classList.remove('hidden');
-        } else {
-            document.getElementById('step-quiz').classList.add('hidden');
-            document.getElementById('step-review-alert').classList.remove('hidden');
-        }
+        tryAdvanceAfterAnswer(currentIdx + 1);
     }
 
     for(let i=1; i<=40; i++) {
@@ -747,9 +893,13 @@
         }
         saveSession(name, phone);
         updateHeaderUser();
+        letterQueue = [];
+        quizBusy = false;
         document.getElementById('step-register').classList.add('hidden');
         document.getElementById('step-quiz').classList.remove('hidden');
+        initQuizCapture();
         renderQuestion();
+        focusQuizCapture();
     }
 
     function renderQuestion() {
@@ -789,6 +939,8 @@
         }
 
         const pastAns = userAnswers[currentSection][qNum];
+        showSaveWarn(false);
+        focusQuizCapture();
     }
 
     function toggleUnsure() {
@@ -797,26 +949,16 @@
         renderQuestion();
     }
 
-    function handleKeypadPress(letter, buttonElement) {
-        if (quizBusy) return;
-        const norm = normalizeQuizLetter(letter);
-        if (!norm) return;
-
-        const qNum = currentIdx + 1;
-        userAnswers[currentSection][qNum] = norm;
-
-        if (userAnswers[currentSection][qNum] !== norm) return;
-
-        quizBusy = true;
-        showLetterPop(norm, () => {
-            advanceAfterAnswer();
-            quizBusy = false;
-        });
+    function handleKeypadPress(letter) {
+        enqueueLetter(letter);
+        focusQuizCapture();
     }
 
     document.addEventListener('keydown', (e) => {
         if (!document.getElementById('step-quiz') || document.getElementById('step-quiz').classList.contains('hidden')) return;
-        if (e.target.classList.contains('phone-digit') || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+        if (e.target.id === 'quiz-capture') return;
+        if (e.target.classList.contains('phone-digit') || e.target.tagName === 'TEXTAREA') return;
+        if (e.target.tagName === 'INPUT' && e.target.id !== 'quiz-capture') return;
         if (e.key === ' ' || e.key === 'Spacebar') {
             e.preventDefault();
             return;
@@ -824,15 +966,28 @@
         const letter = normalizeQuizLetter(e.key);
         if (!letter) return;
         e.preventDefault();
-        handleKeypadPress(letter, null);
+        enqueueLetter(e.key);
     });
 
     function proceedToSubstantive() {
+        const missing = getMissingAnswers('procedural');
+        if (missing.length > 0) {
+            alert(`חסרות ${missing.length} תשובות בפרק הדיוני — מעבר לשאלה ${missing[0]}`);
+            currentSection = 'procedural';
+            currentIdx = missing[0] - 1;
+            document.getElementById('step-intermission').classList.add('hidden');
+            document.getElementById('step-quiz').classList.remove('hidden');
+            renderQuestion();
+            return;
+        }
         currentSection = 'substantive';
         currentIdx = 0;
+        letterQueue = [];
+        quizBusy = false;
         document.getElementById('step-intermission').classList.add('hidden');
         document.getElementById('step-quiz').classList.remove('hidden');
         renderQuestion();
+        focusQuizCapture();
     }
 
     function backToQuizToVerify() {
@@ -884,6 +1039,17 @@
     }
 
     function showResults() {
+        const missSub = getMissingAnswers('substantive');
+        if (missSub.length > 0) {
+            alert(`חסרות ${missSub.length} תשובות בפרק המהותי — מעבר לשאלה ${missSub[0]}`);
+            currentSection = 'substantive';
+            currentIdx = missSub[0] - 1;
+            document.getElementById('step-review-alert').classList.add('hidden');
+            document.getElementById('step-quiz').classList.remove('hidden');
+            renderQuestion();
+            focusQuizCapture();
+            return;
+        }
         document.getElementById('step-review-alert').classList.add('hidden');
         document.getElementById('step-results').classList.remove('hidden');
         calculateAndBuildResults();

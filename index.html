@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>בדיקה מהירה v1.4.1</title>
+    <title>בדיקה מהירה v1.4.2</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -72,35 +72,51 @@
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 0 18px rgba(139,92,246,0.55);
         }
 
-        #letter-flash {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 60;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 5.5rem;
+        .answer-letter {
+            display: inline-block;
             font-size: 4.5rem;
             font-weight: 900;
-            pointer-events: none;
+            line-height: 1;
             opacity: 0;
-            transform: translateY(-110%);
+            transform: scale(0.25);
+            text-shadow: 0 2px 12px rgba(0,0,0,0.12);
         }
-        #letter-flash.flash-show {
-            animation: flashBanner 0.48s ease-out forwards;
+        .answer-letter-a { color: #1d4ed8; }
+        .answer-letter-b { color: #047857; }
+        .answer-letter-g { color: #b45309; }
+        .answer-letter-d { color: #6d28d9; }
+        .answer-letter.answer-show {
+            animation: answerPopSync 0.42s ease-out forwards;
         }
-        @keyframes flashBanner {
-            0%   { transform: translateY(-110%); opacity: 0; }
-            12%  { transform: translateY(0); opacity: 1; }
-            65%  { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-30%); opacity: 0; }
+        #active-q-number-text.number-confirm {
+            animation: numberPopSync 0.42s ease-out forwards;
         }
-        .flash-bg-a { background: linear-gradient(180deg, rgba(37,99,235,0.95), rgba(29,78,216,0.88)); color: #fff; text-shadow: 0 0 24px rgba(255,255,255,0.5); }
-        .flash-bg-b { background: linear-gradient(180deg, rgba(5,150,105,0.95), rgba(4,120,87,0.88)); color: #fff; text-shadow: 0 0 24px rgba(255,255,255,0.5); }
-        .flash-bg-g { background: linear-gradient(180deg, rgba(217,119,6,0.95), rgba(180,83,9,0.88)); color: #fff; text-shadow: 0 0 24px rgba(255,255,255,0.5); }
-        .flash-bg-d { background: linear-gradient(180deg, rgba(124,58,237,0.95), rgba(109,40,217,0.88)); color: #fff; text-shadow: 0 0 24px rgba(255,255,255,0.5); }
+        #active-answer-sep.answer-show {
+            animation: sepFadeSync 0.42s ease-out forwards;
+        }
+        #question-box.answer-confirm {
+            animation: boxGlowSync 0.42s ease-out forwards;
+        }
+        @keyframes answerPopSync {
+            0%   { opacity: 0; transform: scale(0.25); }
+            38%  { opacity: 1; transform: scale(1.12); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes numberPopSync {
+            0%   { transform: scale(1); }
+            38%  { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes sepFadeSync {
+            0%   { opacity: 0; transform: translateX(6px); }
+            38%  { opacity: 1; transform: translateX(0); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes boxGlowSync {
+            0%   { box-shadow: inset 0 0 0 0 rgba(201,162,39,0); }
+            38%  { box-shadow: inset 0 0 0 3px rgba(201,162,39,0.45); }
+            100% { box-shadow: inset 0 0 0 0 rgba(201,162,39,0); }
+        }
 
         @keyframes shine {
             0% { background-position: 0% 50%; }
@@ -191,15 +207,13 @@
 
     <div class="w-full max-w-md app-shell flex flex-col justify-start shadow-2xl border border-slate-200/80 rounded-none sm:rounded-2xl min-h-[90vh] sm:min-h-0 relative">
 
-        <div id="letter-flash" aria-hidden="true"></div>
-        
         <div class="app-header p-4 text-center text-white shrink-0 shadow-md relative">
             <button onclick="openAdminModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white text-xs bg-white/10 p-1.5 rounded-lg transition-colors">🔒 ניהול</button>
             <button type="button" id="btn-logout" onclick="logout()" class="hidden absolute left-4 top-4 text-rose-200 hover:text-white text-xs bg-white/10 hover:bg-rose-500/30 px-2 py-1.5 rounded-lg transition-colors font-bold">🚪 התנתק</button>
             <h1 class="text-lg font-extrabold tracking-tight leading-snug">בדיקה מהירה של מבחני לשכה</h1>
             <p class="text-[11px] text-amber-200/90 font-semibold mt-1">בדיקת מבחן לשכה 23/06/2026</p>
             <p id="user-greeting" class="hidden text-sm text-amber-200 font-bold mt-1.5"></p>
-            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.4.1</span></p>
+            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.4.2</span></p>
         </div>
 
         <!-- 🔒 לוח בקרה למנהל המשולב בשורה אחת חסרת סרבול 🔒 -->
@@ -321,9 +335,11 @@
                 </div>
 
                 <div id="question-box" class="relative py-4 text-center bg-gradient-to-b from-slate-50 to-white rounded-2xl border border-slate-200 flex flex-col justify-center items-center min-h-[120px] shadow-inner">
-                    <div class="flex items-center justify-center gap-2">
+                    <div class="flex items-center justify-center gap-2 flex-wrap">
                         <span class="text-xl font-bold text-slate-500">שאלה</span>
                         <span id="active-q-number-text" class="text-5xl font-black transition-colors duration-300 tracking-tight">1</span>
+                        <span id="active-answer-sep" class="hidden text-2xl font-bold text-slate-300 opacity-0" aria-hidden="true">·</span>
+                        <span id="active-answer-display" class="answer-letter" aria-hidden="true"></span>
                     </div>
                 </div>
 
@@ -444,16 +460,16 @@
 
         <footer class="app-footer mt-auto shrink-0">
             <div>יישומון זה נבנה על ידי <span class="ye-brand">YE</span> ©</div>
-            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.4.1</div>
+            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.4.2</div>
         </footer>
 
     </div>
 
 <script>
-    const APP_VERSION = '1.4.1';
+    const APP_VERSION = '1.4.2';
     const SESSION_KEY = 'mitkatek_lishka_user';
 
-    const LETTER_FLASH_BG = { 'א': 'flash-bg-a', 'ב': 'flash-bg-b', 'ג': 'flash-bg-g', 'ד': 'flash-bg-d' };
+    const LETTER_ANSWER_CLASS = { 'א': 'answer-letter-a', 'ב': 'answer-letter-b', 'ג': 'answer-letter-g', 'ד': 'answer-letter-d' };
 
     function getTimeGreeting() {
         const h = new Date().getHours();
@@ -528,26 +544,60 @@
 
     let popGeneration = 0;
 
-    function showLetterPop(letter, onDone) {
-        const flash = document.getElementById('letter-flash');
-        if (!flash) { if (onDone) onDone(); return; }
+    function clearAnswerFeedback() {
+        const qBox = document.getElementById('question-box');
+        const numText = document.getElementById('active-q-number-text');
+        const ansEl = document.getElementById('active-answer-display');
+        const sepEl = document.getElementById('active-answer-sep');
+        if (qBox) qBox.classList.remove('answer-confirm');
+        if (numText) numText.classList.remove('number-confirm');
+        if (ansEl) {
+            ansEl.classList.remove('answer-show', 'answer-letter-a', 'answer-letter-b', 'answer-letter-g', 'answer-letter-d');
+            ansEl.textContent = '';
+            ansEl.setAttribute('aria-hidden', 'true');
+        }
+        if (sepEl) {
+            sepEl.classList.remove('answer-show');
+            sepEl.classList.add('hidden');
+            sepEl.setAttribute('aria-hidden', 'true');
+        }
+    }
+
+    function showLetterPop(letter, onDone, qNum) {
+        const qBox = document.getElementById('question-box');
+        const numText = document.getElementById('active-q-number-text');
+        const ansEl = document.getElementById('active-answer-display');
+        const sepEl = document.getElementById('active-answer-sep');
+        if (!qBox || !ansEl) { if (onDone) onDone(); return; }
+
         const gen = ++popGeneration;
         let finished = false;
+
+        if (qNum && numText) numText.textContent = qNum;
+
+        clearAnswerFeedback();
+        ansEl.textContent = letter;
+        ansEl.className = `answer-letter ${LETTER_ANSWER_CLASS[letter] || ''}`;
+        ansEl.setAttribute('aria-hidden', 'false');
+        if (sepEl) {
+            sepEl.classList.remove('hidden');
+            sepEl.setAttribute('aria-hidden', 'false');
+        }
+
+        void qBox.offsetWidth;
+        ansEl.classList.add('answer-show');
+        if (sepEl) sepEl.classList.add('answer-show');
+        if (numText) numText.classList.add('number-confirm');
+        qBox.classList.add('answer-confirm');
+
         const finish = () => {
             if (finished || gen !== popGeneration) return;
             finished = true;
-            flash.classList.remove('flash-show');
-            flash.textContent = '';
-            flash.setAttribute('aria-hidden', 'true');
+            clearAnswerFeedback();
             if (onDone) onDone();
         };
-        flash.className = LETTER_FLASH_BG[letter] || '';
-        flash.textContent = letter;
-        flash.setAttribute('aria-hidden', 'false');
-        void flash.offsetWidth;
-        flash.classList.add('flash-show');
-        flash.addEventListener('animationend', finish, { once: true });
-        setTimeout(finish, 480);
+        ansEl.addEventListener('animationend', finish, { once: true });
+        setTimeout(finish, 440);
     }
 
     let MASTER_ANSWERS = {
@@ -591,12 +641,7 @@
         quizBusy = false;
         popGeneration++;
         showSaveWarn(false);
-        const flash = document.getElementById('letter-flash');
-        if (flash) {
-            flash.classList.remove('flash-show');
-            flash.textContent = '';
-            flash.setAttribute('aria-hidden', 'true');
-        }
+        clearAnswerFeedback();
         const cap = document.getElementById('quiz-capture');
         if (cap) cap.value = '';
     }
@@ -676,7 +721,7 @@
         if (letterQueue.length > 0) {
             finalize();
         } else {
-            showLetterPop(norm, finalize);
+            showLetterPop(norm, finalize, qNum);
         }
     }
 
@@ -955,7 +1000,8 @@
         const qBox = document.getElementById('question-box');
         const numText = document.getElementById('active-q-number-text');
         const headerBadge = document.getElementById('quiz-header-badge');
-        
+
+        clearAnswerFeedback();
         qBox.classList.remove('slide-in');
         void qBox.offsetWidth; 
         qBox.classList.add('slide-in');

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>בדיקה מהירה v1.6.0</title>
+    <title>בדיקה מהירה v1.6.1</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -453,12 +453,12 @@
     <div class="w-full max-w-md app-shell flex flex-col justify-start border border-white/40 rounded-none sm:rounded-2xl min-h-[90vh] sm:min-h-0 relative">
 
         <div class="app-header p-4 text-center text-white shrink-0 shadow-md relative">
-            <button onclick="openAdminModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white text-xs bg-white/10 p-1.5 rounded-lg transition-colors">🔒 ניהול</button>
+            <button type="button" id="btn-admin" onclick="openAdminModal()" class="hidden absolute right-4 top-4 text-slate-400 hover:text-white text-xs bg-white/10 p-1.5 rounded-lg transition-colors">🔒 ניהול</button>
             <button type="button" id="btn-logout" onclick="logout()" class="hidden absolute left-4 top-4 text-rose-200 hover:text-white text-xs bg-white/10 hover:bg-rose-500/30 px-2 py-1.5 rounded-lg transition-colors font-bold">🚪 התנתק</button>
             <h1 class="text-lg font-extrabold tracking-tight leading-snug">בדיקה מהירה של מבחני לשכה</h1>
             <p class="text-[11px] text-amber-200/90 font-semibold mt-1">בדיקת מבחן לשכה 23/06/2026</p>
             <p id="user-greeting" class="hidden text-sm text-amber-200 font-bold mt-1.5"></p>
-            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.6.0</span></p>
+            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.6.1</span></p>
         </div>
 
         <!-- 🔒 לוח בקרה למנהל המשולב בשורה אחת חסרת סרבול 🔒 -->
@@ -722,13 +722,13 @@
 
         <footer class="app-footer mt-auto shrink-0">
             <div>יישומון זה נבנה על ידי <span class="ye-brand">YE</span> ©</div>
-            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.6.0</div>
+            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.6.1</div>
         </footer>
 
     </div>
 
 <script>
-    const APP_VERSION = '1.6.0';
+    const APP_VERSION = '1.6.1';
     /** מצב הדגמה למתמחים — שנה ל-40 לפני מבחן אמיתי */
     const QUESTIONS_PER_SECTION = 6;
     const TOTAL_QUIZ_QUESTIONS = QUESTIONS_PER_SECTION * 2;
@@ -758,7 +758,38 @@
         });
     }
     const SESSION_KEY = 'mitkatek_lishka_user';
+    const ADMIN_NAME = 'אליאב יחיאל';
+    const ADMIN_PHONE = '0542452100';
     let isGuestSession = false;
+
+    function normalizePersonName(name) {
+        return (name || '').trim().replace(/\s+/g, ' ');
+    }
+
+    function isAdminUser(name, phone) {
+        const digits = (phone || '').replace(/\D/g, '');
+        return normalizePersonName(name) === ADMIN_NAME && digits === ADMIN_PHONE;
+    }
+
+    function updateAdminButtonVisibility() {
+        const btn = document.getElementById('btn-admin');
+        if (!btn) return;
+        let show = false;
+        if (!isGuestSession) {
+            const session = loadSession();
+            if (session && !session.isGuest && isAdminUser(session.name, session.phone)) {
+                show = true;
+            } else {
+                const reg = document.getElementById('step-register');
+                if (reg && !reg.classList.contains('hidden')) {
+                    const name = document.getElementById('user-name')?.value || '';
+                    show = isAdminUser(name, getFullPhone());
+                }
+            }
+        }
+        btn.classList.toggle('hidden', !show);
+        if (!show) closeAdminModal();
+    }
 
     const LETTER_ANSWER_CLASS = { 'א': 'answer-letter-a', 'ב': 'answer-letter-b', 'ג': 'answer-letter-g', 'ד': 'answer-letter-d' };
 
@@ -886,6 +917,7 @@
             greetEl.classList.add('hidden');
             logoutBtn.classList.add('hidden');
         }
+        updateAdminButtonVisibility();
     }
 
     function restoreSessionToForm() {
@@ -934,6 +966,7 @@
         });
         document.getElementById('step-register')?.classList.remove('hidden');
         updatePageBackground();
+        updateAdminButtonVisibility();
     }
 
     let popGeneration = 0;
@@ -1216,6 +1249,7 @@
         const phone = getFullPhone();
         const btn = document.getElementById('btn-login');
         if (btn) btn.disabled = !(name.length > 0 && phone.length === 10);
+        updateAdminButtonVisibility();
     }
 
     function initLoginFormValidation() {
@@ -1311,6 +1345,10 @@
     }
 
     function openAdminModal() {
+        const session = loadSession();
+        const name = session?.name || document.getElementById('user-name')?.value || '';
+        const phone = session?.phone || getFullPhone();
+        if (!isAdminUser(name, phone)) return;
         const pass = prompt("הזן סיסמת מנהל לשינוי המחוון והאנליטיקה:");
         if (pass === "1234") {
             document.getElementById('admin-panel').classList.remove('hidden');

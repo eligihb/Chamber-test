@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>בדיקה מהירה v1.4.3</title>
+    <title>בדיקה מהירה v1.4.4</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -281,6 +281,48 @@
             background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
             box-shadow: 0 4px 14px rgba(15, 23, 42, 0.35);
         }
+        .btn-guest {
+            background: #fff;
+            border: 2px solid #cbd5e1;
+            color: #334155;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+        }
+        .btn-guest:hover { background: #f8fafc; border-color: #94a3b8; }
+        .btn-locked {
+            opacity: 0.42 !important;
+            cursor: not-allowed !important;
+            filter: grayscale(0.55);
+            pointer-events: none;
+        }
+        .guest-mode-banner {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border: 2px dashed #94a3b8;
+            border-radius: 0.875rem;
+            padding: 0.65rem 0.75rem;
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: #475569;
+            line-height: 1.45;
+        }
+        .guest-lock-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            background: rgba(248, 250, 252, 0.82);
+            border-radius: inherit;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #64748b;
+            line-height: 1.4;
+        }
+        .panel-guest-locked .guest-lock-overlay { display: flex; }
+        .panel-guest-locked input[type="range"] { pointer-events: none; opacity: 0.35; }
     </style>
 </head>
 <body class="text-slate-900 min-h-screen flex flex-col items-center justify-start antialiased p-0 sm:p-4 sm:py-6">
@@ -293,7 +335,7 @@
             <h1 class="text-lg font-extrabold tracking-tight leading-snug">בדיקה מהירה של מבחני לשכה</h1>
             <p class="text-[11px] text-amber-200/90 font-semibold mt-1">בדיקת מבחן לשכה 23/06/2026</p>
             <p id="user-greeting" class="hidden text-sm text-amber-200 font-bold mt-1.5"></p>
-            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.4.3</span></p>
+            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.4.4</span></p>
         </div>
 
         <!-- 🔒 לוח בקרה למנהל המשולב בשורה אחת חסרת סרבול 🔒 -->
@@ -370,7 +412,9 @@
                         </div>
                     </div>
                 </div>
-                <button onclick="startQuiz()" class="w-full btn-primary hover:opacity-95 text-white p-3.5 rounded-xl font-bold text-sm transition-all active:scale-[0.99] mt-2">המשך להזנת תשובות ←</button>
+                <button onclick="startQuiz()" class="w-full btn-primary hover:opacity-95 text-white p-3.5 rounded-xl font-bold text-sm transition-all active:scale-[0.99] mt-2">המשך עם פרטים (גישה מלאה) ←</button>
+                <button type="button" onclick="startQuizAsGuest()" class="w-full btn-guest hover:opacity-95 p-3 rounded-xl font-bold text-sm transition-all active:scale-[0.99]">👤 המשך כאורח — ללא שם וטלפון</button>
+                <p class="text-[10px] text-slate-500 text-center font-medium leading-relaxed">במצב אורח: תרגול והצגת ציון בסיסי בלבד.<br>שיתוף, צילום וסימולטור ניסוח/פקטור נעולים.</p>
             </div>
 
             <!-- מסך ביניים 1 -->
@@ -454,11 +498,16 @@
             <div id="step-results" class="space-y-4 hidden animate-fade-in">
                 
                 <!-- כפתורי הפעולה בראש העמוד -->
+                <div id="guest-mode-notice-results" class="guest-mode-banner hidden" role="status">
+                    👤 מצב אורח פעיל — שיתוף, צילום וסימולטור ניסוח/פקטור נעולים.<br>
+                    <span class="text-slate-600 font-semibold">להפעלת כל היכולות: הירשם עם שם וטלפון במסך הכניסה.</span>
+                </div>
+
                 <div class="grid grid-cols-3 gap-2 py-1">
-                    <button onclick="window.print()" class="p-2.5 bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md hover:bg-slate-700 transition-colors flex items-center justify-center gap-1">
+                    <button type="button" id="btn-print" onclick="printResults()" class="p-2.5 bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md hover:bg-slate-700 transition-colors flex items-center justify-center gap-1">
                         <span>📸</span> צילום
                     </button>
-                    <button onclick="shareScore()" class="p-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl shadow-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-1">
+                    <button type="button" id="btn-share" onclick="shareScore()" class="p-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl shadow-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-1">
                         <span>🔗</span> שיתוף
                     </button>
                     <button onclick="restart()" class="p-2.5 bg-rose-600 text-white font-bold text-xs rounded-xl shadow-md hover:bg-rose-700 transition-colors flex items-center justify-center gap-1">
@@ -505,7 +554,11 @@
                 <div id="writing-task-alert" class="p-3 rounded-xl border-2 font-bold text-center text-xs shadow-2xs"></div>
 
                 <!-- שני סליידרים חיים -->
-                <div class="bg-slate-50 p-3.5 rounded-xl border-2 border-slate-200 space-y-3">
+                <div id="sliders-panel" class="relative bg-slate-50 p-3.5 rounded-xl border-2 border-slate-200 space-y-3">
+                    <div id="guest-lock-sliders-overlay" class="guest-lock-overlay" aria-hidden="true">
+                        🔒 נעול במצב אורח<br>
+                        <span class="font-semibold text-slate-500">ניסוח משפטי ופקטור — לאחר הרשמה</span>
+                    </div>
                     <div class="space-y-1">
                         <div class="flex justify-between text-xs font-extrabold text-slate-700">
                             <span>✍️ ציון מטלת ניסוח (כתיבה):</span>
@@ -554,13 +607,13 @@
 
         <footer class="app-footer mt-auto shrink-0">
             <div>יישומון זה נבנה על ידי <span class="ye-brand">YE</span> ©</div>
-            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.4.3</div>
+            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.4.4</div>
         </footer>
 
     </div>
 
 <script>
-    const APP_VERSION = '1.4.3';
+    const APP_VERSION = '1.4.4';
     /** שנה ל-false לאחר הזנת מפתח תשובות אמיתי במסך ניהול */
     const DEMO_ANSWER_KEY_ACTIVE = true;
 
@@ -572,6 +625,7 @@
         });
     }
     const SESSION_KEY = 'mitkatek_lishka_user';
+    let isGuestSession = false;
 
     const LETTER_ANSWER_CLASS = { 'א': 'answer-letter-a', 'ב': 'answer-letter-b', 'ג': 'answer-letter-g', 'ד': 'answer-letter-d' };
 
@@ -583,10 +637,80 @@
         return 'לילה טוב';
     }
 
-    function saveSession(name, phone) {
+    function saveSession(name, phone, isGuest = false) {
         try {
-            localStorage.setItem(SESSION_KEY, JSON.stringify({ name, phone, tour: selectedTour }));
+            localStorage.setItem(SESSION_KEY, JSON.stringify({
+                name: isGuest ? '' : name,
+                phone: isGuest ? '' : phone,
+                tour: selectedTour,
+                isGuest: !!isGuest
+            }));
         } catch (e) { /* ignore */ }
+    }
+
+    function updateGuestFeatureLocks() {
+        const guest = isGuestSession;
+        const printBtn = document.getElementById('btn-print');
+        const shareBtn = document.getElementById('btn-share');
+        const slidersPanel = document.getElementById('sliders-panel');
+        const guestNotice = document.getElementById('guest-mode-notice-results');
+        const lockOverlay = document.getElementById('guest-lock-sliders-overlay');
+
+        [printBtn, shareBtn].forEach(btn => {
+            if (!btn) return;
+            btn.classList.toggle('btn-locked', guest);
+            btn.setAttribute('aria-disabled', guest ? 'true' : 'false');
+        });
+
+        ['writing-slider', 'factor-slider'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.disabled = guest;
+        });
+
+        if (slidersPanel) slidersPanel.classList.toggle('panel-guest-locked', guest);
+        if (lockOverlay) lockOverlay.setAttribute('aria-hidden', guest ? 'false' : 'true');
+        if (guestNotice) guestNotice.classList.toggle('hidden', !guest);
+
+        if (guest) {
+            currentWritingScore = 0;
+            currentFactor = 0;
+            const wSlider = document.getElementById('writing-slider');
+            const fSlider = document.getElementById('factor-slider');
+            if (wSlider) wSlider.value = 0;
+            if (fSlider) fSlider.value = 0;
+            const wLabel = document.getElementById('writing-label');
+            const fLabel = document.getElementById('factor-label');
+            if (wLabel) wLabel.innerText = '0 / 20 נק\'';
+            if (fLabel) fLabel.innerText = '+0 נק\'';
+            const resultsVisible = document.getElementById('step-results') && !document.getElementById('step-results').classList.contains('hidden');
+            if (resultsVisible) updateScoreDisplay();
+        }
+    }
+
+    function requireRegisteredFeature(featureName) {
+        if (!isGuestSession) return true;
+        alert(`🔒 ${featureName} זמין רק לאחר הרשמה עם שם וטלפון.\n\nחזור למסך הכניסה ובחר "המשך עם פרטים".`);
+        return false;
+    }
+
+    function printResults() {
+        if (!requireRegisteredFeature('צילום / הדפסה')) return;
+        window.print();
+    }
+
+    function shareScore() {
+        if (!requireRegisteredFeature('שיתוף ציון')) return;
+        const score = document.getElementById('final-score')?.innerText || '0';
+        const proc = document.getElementById('score-procedural')?.innerText || '0';
+        const subs = document.getElementById('score-substantive')?.innerText || '0';
+        const text = `בדיקה מהירה של מבחני לשכה — ציון ${score} (דיוני ${proc}/40, מהותי ${subs}/40)`;
+        const url = window.location.href;
+        if (navigator.share) {
+            navigator.share({ title: 'בדיקה מהירה — מבחני לשכה', text, url }).catch(() => {});
+        } else {
+            navigator.clipboard?.writeText(`${text}\n${url}`);
+            alert('הטקסט הועתק ללוח — הדבק ושתף!');
+        }
     }
 
     function loadSession() {
@@ -605,11 +729,17 @@
         const greetEl = document.getElementById('user-greeting');
         const logoutBtn = document.getElementById('btn-logout');
         if (!greetEl || !logoutBtn) return;
-        if (session && session.name) {
+        if (session?.isGuest || isGuestSession) {
+            greetEl.textContent = '👤 מצב אורח — תרגול בלבד';
+            greetEl.classList.remove('hidden');
+            logoutBtn.classList.remove('hidden');
+            logoutBtn.innerHTML = '🚪 יציאה';
+        } else if (session && session.name) {
             const first = session.name.trim().split(/\s+/)[0];
             greetEl.textContent = `${getTimeGreeting()}, ${first}`;
             greetEl.classList.remove('hidden');
             logoutBtn.classList.remove('hidden');
+            logoutBtn.innerHTML = '🚪 התנתק';
         } else {
             greetEl.classList.add('hidden');
             logoutBtn.classList.add('hidden');
@@ -618,7 +748,17 @@
 
     function restoreSessionToForm() {
         const session = loadSession();
-        if (!session) return;
+        if (!session) {
+            isGuestSession = false;
+            updateGuestFeatureLocks();
+            return;
+        }
+        isGuestSession = !!session.isGuest;
+        if (session.isGuest) {
+            updateHeaderUser();
+            updateGuestFeatureLocks();
+            return;
+        }
         const nameEl = document.getElementById('user-name');
         if (nameEl && session.name) nameEl.value = session.name;
         if (session.phone && session.phone.length === 10) {
@@ -633,13 +773,17 @@
             if (sel) sel.value = selectedTour;
         }
         updateHeaderUser();
+        updateGuestFeatureLocks();
     }
 
     function logout() {
-        if (!confirm('להתנתק ולחזור למסך הכניסה?')) return;
+        const msg = isGuestSession ? 'לצאת ממצב אורח ולחזור למסך הכניסה?' : 'להתנתק ולחזור למסך הכניסה?';
+        if (!confirm(msg)) return;
         haltLetterPipeline();
+        isGuestSession = false;
         clearSession();
         updateHeaderUser();
+        updateGuestFeatureLocks();
         ['step-quiz', 'step-intermission', 'step-review-alert', 'step-results'].forEach(id => {
             document.getElementById(id)?.classList.add('hidden');
         });
@@ -1078,6 +1222,15 @@
         }
     }
 
+    function enterQuizScreen() {
+        haltLetterPipeline();
+        document.getElementById('step-register').classList.add('hidden');
+        document.getElementById('step-quiz').classList.remove('hidden');
+        initQuizCapture();
+        renderQuestion();
+        focusQuizCapture();
+    }
+
     function startQuiz() {
         const name = document.getElementById('user-name').value.trim();
         const phone = getFullPhone();
@@ -1089,14 +1242,19 @@
             alert("אנא מלא מספר טלפון מלא (3 ספרות קידומת + 7 ספרות)");
             return;
         }
-        saveSession(name, phone);
+        isGuestSession = false;
+        saveSession(name, phone, false);
         updateHeaderUser();
-        haltLetterPipeline();
-        document.getElementById('step-register').classList.add('hidden');
-        document.getElementById('step-quiz').classList.remove('hidden');
-        initQuizCapture();
-        renderQuestion();
-        focusQuizCapture();
+        updateGuestFeatureLocks();
+        enterQuizScreen();
+    }
+
+    function startQuizAsGuest() {
+        isGuestSession = true;
+        saveSession('', '', true);
+        updateHeaderUser();
+        updateGuestFeatureLocks();
+        enterQuizScreen();
     }
 
     function renderQuestion() {
@@ -1256,6 +1414,7 @@
         document.getElementById('step-review-alert').classList.add('hidden');
         document.getElementById('step-results').classList.remove('hidden');
         calculateAndBuildResults();
+        updateGuestFeatureLocks();
     }
 
     function calculateAndBuildResults() {
@@ -1409,12 +1568,14 @@
     }
 
     function updateWritingScore(val) {
+        if (isGuestSession) return;
         currentWritingScore = Number(val);
         document.getElementById('writing-label').innerText = `${val} / 20 נק'`;
         updateScoreDisplay();
     }
 
     function updateFactor(val) {
+        if (isGuestSession) return;
         currentFactor = Number(val);
         document.getElementById('factor-label').innerText = `+${val} נק'`;
         updateScoreDisplay();
@@ -1491,6 +1652,7 @@
     initPhoneInputs();
     restoreSessionToForm();
     updateDemoKeyNotices();
+    updateGuestFeatureLocks();
 </script>
 
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>בדיקה מהירה v1.5.2</title>
+    <title>בדיקה מהירה v1.5.3</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -446,7 +446,7 @@
             <h1 class="text-lg font-extrabold tracking-tight leading-snug">בדיקה מהירה של מבחני לשכה</h1>
             <p class="text-[11px] text-amber-200/90 font-semibold mt-1">בדיקת מבחן לשכה 23/06/2026</p>
             <p id="user-greeting" class="hidden text-sm text-amber-200 font-bold mt-1.5"></p>
-            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.5.2</span></p>
+            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.5.3</span></p>
         </div>
 
         <!-- 🔒 לוח בקרה למנהל המשולב בשורה אחת חסרת סרבול 🔒 -->
@@ -563,7 +563,7 @@
 
             <!-- מסך 2: תקתוק שאלות -->
             <div id="step-quiz" class="space-y-3 hidden">
-                <input type="text" id="quiz-capture" autocomplete="off" autocorrect="off" spellcheck="false" aria-hidden="true" tabindex="-1" />
+                <input type="text" id="quiz-capture" autocomplete="off" autocorrect="off" spellcheck="false" inputmode="none" readonly aria-hidden="true" tabindex="-1" />
                 <div id="save-warn">⚠️ התשובה לא נשמרה — לחץ שוב על האות</div>
                 <div id="quiz-header-badge" class="flex justify-between items-center text-white p-2.5 rounded-xl shadow-xs">
                     <span id="section-title" class="text-[11px] font-bold uppercase tracking-wider">פרק: דיוני</span>
@@ -707,13 +707,13 @@
 
         <footer class="app-footer mt-auto shrink-0">
             <div>יישומון זה נבנה על ידי <span class="ye-brand">YE</span> ©</div>
-            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.5.2</div>
+            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.5.3</div>
         </footer>
 
     </div>
 
 <script>
-    const APP_VERSION = '1.5.2';
+    const APP_VERSION = '1.5.3';
 
     function updatePageBackground() {
         const reg = document.getElementById('step-register');
@@ -1139,12 +1139,32 @@
         }
     }
 
+    function isTouchQuizDevice() {
+        return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+    }
+
+    function blurQuizCapture() {
+        const cap = document.getElementById('quiz-capture');
+        if (cap) {
+            cap.blur();
+            cap.readOnly = true;
+        }
+        if (document.activeElement && document.activeElement.tagName === 'INPUT' && document.activeElement.id === 'quiz-capture') {
+            document.activeElement.blur();
+        }
+    }
+
     function focusQuizCapture() {
+        if (isTouchQuizDevice()) {
+            blurQuizCapture();
+            return;
+        }
         requestAnimationFrame(() => {
             const cap = document.getElementById('quiz-capture');
-            if (cap && !document.getElementById('step-quiz').classList.contains('hidden')) {
-                cap.focus({ preventScroll: true });
-            }
+            const stepQuiz = document.getElementById('step-quiz');
+            if (!cap || !stepQuiz || stepQuiz.classList.contains('hidden')) return;
+            cap.readOnly = false;
+            cap.focus({ preventScroll: true });
         });
     }
 
@@ -1157,6 +1177,7 @@
             cap.value = '';
             for (const ch of val) enqueueLetter(ch);
         });
+        cap.addEventListener('blur', () => { cap.readOnly = true; });
     }
 
     function getPhoneDigits(group) {
@@ -1459,7 +1480,7 @@
 
     function handleKeypadPress(letter) {
         enqueueLetter(letter);
-        focusQuizCapture();
+        blurQuizCapture();
     }
 
     document.addEventListener('keydown', (e) => {

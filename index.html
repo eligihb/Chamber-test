@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>בדיקה מהירה v1.5.3</title>
+    <title>בדיקה מהירה v1.6.0</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -432,6 +432,18 @@
         }
         .panel-guest-locked .guest-row-lock { display: inline-flex; align-items: center; gap: 0.15rem; }
         .panel-guest-locked input[type="range"] { pointer-events: none; }
+        .demo-q-note {
+            font-size: 0.58rem;
+            font-weight: 700;
+            color: #b45309;
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 0.35rem;
+            padding: 0.1rem 0.35rem;
+            line-height: 1.25;
+            text-align: center;
+            max-width: 9rem;
+        }
     </style>
 </head>
 <body class="text-slate-900 min-h-screen flex flex-col items-center justify-start antialiased p-0 sm:p-4 sm:py-6">
@@ -446,7 +458,7 @@
             <h1 class="text-lg font-extrabold tracking-tight leading-snug">בדיקה מהירה של מבחני לשכה</h1>
             <p class="text-[11px] text-amber-200/90 font-semibold mt-1">בדיקת מבחן לשכה 23/06/2026</p>
             <p id="user-greeting" class="hidden text-sm text-amber-200 font-bold mt-1.5"></p>
-            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.5.3</span></p>
+            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.6.0</span></p>
         </div>
 
         <!-- 🔒 לוח בקרה למנהל המשולב בשורה אחת חסרת סרבול 🔒 -->
@@ -529,7 +541,7 @@
                 <div class="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl mx-auto shadow-md">✓</div>
                 <div class="space-y-1">
                     <h2 class="text-xl font-extrabold text-slate-900">פרק א' (דיוני) הושלם!</h2>
-                    <p class="text-xs text-slate-600 px-4 font-medium">ענית על כל 40 השאלות של סדרי הדין. עכשיו עוברים לחלק המהותי.</p>
+                    <p class="text-xs text-slate-600 px-4 font-medium">ענית על כל 6 השאלות של סדרי הדין. עכשיו עוברים לחלק המהותי.</p>
                 </div>
                 <button onclick="proceedToSubstantive()" class="w-full bg-blue-600 hover:bg-blue-700 text-white p-3.5 rounded-xl font-bold text-sm transition-all shadow-md">
                     עבור לפרק ב' (מהותי) ←
@@ -567,7 +579,10 @@
                 <div id="save-warn">⚠️ התשובה לא נשמרה — לחץ שוב על האות</div>
                 <div id="quiz-header-badge" class="flex justify-between items-center text-white p-2.5 rounded-xl shadow-xs">
                     <span id="section-title" class="text-[11px] font-bold uppercase tracking-wider">פרק: דיוני</span>
-                    <span id="question-number" class="text-[11px] font-black bg-white/20 px-2 py-0.5 rounded-md">שאלה 1 / 40</span>
+                    <div class="flex flex-col items-end gap-0.5">
+                        <span id="question-number" class="text-[11px] font-black bg-white/20 px-2 py-0.5 rounded-md">שאלה 1 / 6</span>
+                        <span class="demo-q-note">מס׳ שאלות נמוך — המחשה בלבד</span>
+                    </div>
                 </div>
 
                 <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden shadow-inner">
@@ -638,7 +653,7 @@
                         <span class="score-section-label">פרק א' · דיוני</span>
                         <div class="score-section-value">
                             <span id="score-procedural" class="score-section-num">0</span>
-                            <span class="score-section-denom">/ 40</span>
+                            <span class="score-section-denom">/ 6</span>
                         </div>
                         <span id="score-procedural-pct" class="score-section-pct">0%</span>
                     </div>
@@ -646,7 +661,7 @@
                         <span class="score-section-label">פרק ב' · מהותי</span>
                         <div class="score-section-value">
                             <span id="score-substantive" class="score-section-num">0</span>
-                            <span class="score-section-denom">/ 40</span>
+                            <span class="score-section-denom">/ 6</span>
                         </div>
                         <span id="score-substantive-pct" class="score-section-pct">0%</span>
                     </div>
@@ -707,13 +722,21 @@
 
         <footer class="app-footer mt-auto shrink-0">
             <div>יישומון זה נבנה על ידי <span class="ye-brand">YE</span> ©</div>
-            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.5.3</div>
+            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.6.0</div>
         </footer>
 
     </div>
 
 <script>
-    const APP_VERSION = '1.5.3';
+    const APP_VERSION = '1.6.0';
+    /** מצב הדגמה למתמחים — שנה ל-40 לפני מבחן אמיתי */
+    const QUESTIONS_PER_SECTION = 6;
+    const TOTAL_QUIZ_QUESTIONS = QUESTIONS_PER_SECTION * 2;
+    const LAST_Q_IDX = QUESTIONS_PER_SECTION - 1;
+
+    function scaleScoreThreshold(n) {
+        return Math.round(n * TOTAL_QUIZ_QUESTIONS / 80);
+    }
 
     function updatePageBackground() {
         const reg = document.getElementById('step-register');
@@ -822,7 +845,7 @@
         const score = document.getElementById('final-score')?.innerText || '0';
         const proc = document.getElementById('score-procedural')?.innerText || '0';
         const subs = document.getElementById('score-substantive')?.innerText || '0';
-        const text = `בדיקה מהירה של מבחני לשכה — ציון ${score} (דיוני ${proc}/40, מהותי ${subs}/40)`;
+        const text = `בדיקה מהירה של מבחני לשכה — ציון ${score} (דיוני ${proc}/${QUESTIONS_PER_SECTION}, מהותי ${subs}/${QUESTIONS_PER_SECTION})`;
         const url = window.location.href;
         if (navigator.share) {
             navigator.share({ title: 'בדיקה מהירה — מבחני לשכה', text, url }).catch(() => {});
@@ -1024,7 +1047,7 @@
 
     function getMissingAnswers(section) {
         const missing = [];
-        for (let i = 1; i <= 40; i++) {
+        for (let i = 1; i <= QUESTIONS_PER_SECTION; i++) {
             if (!userAnswers[section][i]) missing.push(i);
         }
         return missing;
@@ -1102,7 +1125,7 @@
             return;
         }
 
-        if (currentIdx < 39) {
+        if (currentIdx < LAST_Q_IDX) {
             currentIdx++;
             renderQuestion();
             return;
@@ -1435,7 +1458,7 @@
         qBox.classList.add('slide-in');
 
         numText.innerText = qNum;
-        document.getElementById('question-number').innerText = `שאלה ${qNum} / 40`;
+        document.getElementById('question-number').innerText = `שאלה ${qNum} / ${QUESTIONS_PER_SECTION}`;
         
         const progressBar = document.getElementById('progress-bar');
         if (currentSection === 'procedural') {
@@ -1454,7 +1477,9 @@
             if (progressBar) progressBar.className = 'bg-purple-500 h-full transition-all duration-300';
         }
         
-        const totalProgress = currentSection === 'procedural' ? (qNum / 80) * 100 : ((qNum + 40) / 80) * 100;
+        const totalProgress = currentSection === 'procedural'
+            ? (qNum / TOTAL_QUIZ_QUESTIONS) * 100
+            : ((qNum + QUESTIONS_PER_SECTION) / TOTAL_QUIZ_QUESTIONS) * 100;
         if (progressBar) progressBar.style.width = `${totalProgress}%`;
 
         const isUnsure = unsureQuestions[currentSection][qNum];
@@ -1523,7 +1548,7 @@
     function backToQuizToVerify() {
         haltLetterPipeline();
         currentSection = 'substantive';
-        currentIdx = 39;
+        currentIdx = LAST_Q_IDX;
         document.getElementById('step-review-alert').classList.add('hidden');
         document.getElementById('step-quiz').classList.remove('hidden');
         renderQuestion();
@@ -1537,7 +1562,7 @@
             renderQuestion();
         } else if (currentSection === 'substantive') {
             currentSection = 'procedural';
-            currentIdx = 39;
+            currentIdx = LAST_Q_IDX;
             renderQuestion();
         }
     }
@@ -1599,7 +1624,7 @@
         let proceduralHtml = '';
         let substantiveHtml = '';
 
-        for(let i=1; i<=40; i++) {
+        for(let i=1; i<=QUESTIONS_PER_SECTION; i++) {
             let targetMasterQ = i;
             if (selectedTour !== '1') targetMasterQ = TOUR_MAPPINGS[selectedTour][i-1];
             const correctAns = MASTER_ANSWERS.procedural[targetMasterQ];
@@ -1660,7 +1685,7 @@
                 </div>`;
         }
 
-        for(let i=1; i<=40; i++) {
+        for(let i=1; i<=QUESTIONS_PER_SECTION; i++) {
             let targetMasterQ = i;
             if (selectedTour !== '1') targetMasterQ = TOUR_MAPPINGS[selectedTour][i-1];
             const correctAns = MASTER_ANSWERS.substantive[targetMasterQ];
@@ -1726,8 +1751,8 @@
 
         document.getElementById('score-procedural').innerText = rawProceduralCorrect;
         document.getElementById('score-substantive').innerText = rawSubstantiveCorrect;
-        document.getElementById('score-procedural-pct').innerText = `${Math.round((rawProceduralCorrect / 40) * 100)}%`;
-        document.getElementById('score-substantive-pct').innerText = `${Math.round((rawSubstantiveCorrect / 40) * 100)}%`;
+        document.getElementById('score-procedural-pct').innerText = `${Math.round((rawProceduralCorrect / QUESTIONS_PER_SECTION) * 100)}%`;
+        document.getElementById('score-substantive-pct').innerText = `${Math.round((rawSubstantiveCorrect / QUESTIONS_PER_SECTION) * 100)}%`;
 
         if (totalUnsure > 0) {
             const accuracy = Math.round((unsureCorrect / totalUnsure) * 100);
@@ -1766,32 +1791,33 @@
         const statusBadge = document.getElementById('pass-status');
         const alertBox = document.getElementById('writing-task-alert');
 
-        const pointsNeededInWriting = Math.max(65 - americanScore - currentFactor, 0);
+        const passTarget = scaleScoreThreshold(65);
+        const pointsNeededInWriting = Math.max(passTarget - americanScore - currentFactor, 0);
 
         if (pointsNeededInWriting > 20) {
             alertBox.className = "p-3 rounded-xl border-2 font-bold text-center text-xs bg-rose-50 text-rose-800 border-rose-300 shadow-3xs";
             alertBox.innerHTML = `⚠️ הציון מהשאלות האמריקאיות נמוך מדי (${americanScore} נק'). <br> <span class="font-extrabold mt-1 block text-rose-900">גם ציון מקסימלי במטלת הכתיבה לא יספיק כדי לעבור את הבחינה.</span>`;
         } else if (pointsNeededInWriting === 0) {
             alertBox.className = "p-3 rounded-xl border-2 font-bold text-center text-xs bg-emerald-50 text-emerald-800 border-emerald-300 shadow-3xs";
-            alertBox.innerHTML = `🎉 חוף מבטחים: עברת את רף ה-65 רק מהשאלות האמריקאיות! <br> <span class="font-extrabold mt-1 block text-emerald-900">הנך נדרש ל-0 נקודות בניסוח המשפטי כדי לעבור.</span>`;
+            alertBox.innerHTML = `🎉 חוף מבטחים: עברת את רף ה-${passTarget} רק מהשאלות האמריקאיות! <br> <span class="font-extrabold mt-1 block text-emerald-900">הנך נדרש ל-0 נקודות בניסוח המשפטי כדי לעבור.</span>`;
         } else {
             alertBox.className = "p-3 rounded-xl border-2 font-bold text-center text-xs bg-amber-50 text-amber-800 border-amber-300 shadow-3xs";
-            alertBox.innerHTML = `✍️ מדד מטלת כתיבה: כדי לעבור את המבחן ולקבל ציון 65, <br> <span class="font-black text-sm text-amber-950 underline block mt-1">הנך נדרש ל-${pointsNeededInWriting} נקודות בניסוח המשפטי כדי לעבור.</span>`;
+            alertBox.innerHTML = `✍️ מדד מטלת כתיבה: כדי לעבור את המבחן ולקבל ציון ${passTarget}, <br> <span class="font-black text-sm text-amber-950 underline block mt-1">הנך נדרש ל-${pointsNeededInWriting} נקודות בניסוח המשפטי כדי לעבור.</span>`;
         }
 
-        if (americanScore > 55) {
+        if (americanScore > scaleScoreThreshold(55)) {
             scoreBox.className = "text-center p-5 rounded-2xl border-2 shadow-lg space-y-1 bg-sparkle-gold border-amber-400 text-amber-950 font-bold";
             statusText.innerText = "🏆 אלוף! ציון פנומנלי, אתה בטופ הארצי!";
             statusBadge.innerHTML = `<span class="bg-amber-600 text-white px-4 py-1.5 rounded-full text-xs font-black shadow-xs inline-block">עברת בטופ הארצי! 👑</span>`;
-        } else if (americanScore >= 52) {
+        } else if (americanScore >= scaleScoreThreshold(52)) {
             scoreBox.className = "text-center p-5 rounded-2xl border-2 shadow-lg space-y-1 bg-sparkle-emerald border-emerald-400 text-emerald-950 font-bold";
             statusText.innerText = "✨ מדהים! עברת את האמריקאי בהצטיינות וברוגע!";
             statusBadge.innerHTML = `<span class="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs font-black shadow-xs inline-block">עובר חגיגי ומצטיין! 🎉</span>`;
-        } else if (americanScore >= 50) {
+        } else if (americanScore >= scaleScoreThreshold(50)) {
             scoreBox.className = "text-center p-5 rounded-2xl border-2 shadow-md space-y-1 bg-emerald-50 border-emerald-300 text-emerald-900";
-            statusText.innerText = "👍 עברת את הרף הבטוח של השאלות האמריקאיות (50+)!";
+            statusText.innerText = `👍 עברת את הרף הבטוח של השאלות האמריקאיות (${scaleScoreThreshold(50)}+)!`;
             statusBadge.innerHTML = `<span class="bg-emerald-500 text-white px-4 py-1.5 rounded-full text-xs font-black shadow-xs inline-block">עברת את המרחב האמריקאי קלאס 🥂</span>`;
-        } else if (americanScore >= 45) {
+        } else if (americanScore >= scaleScoreThreshold(45)) {
             scoreBox.className = "text-center p-5 rounded-2xl border-2 shadow-md space-y-1 bg-amber-50 border-amber-300 text-amber-950";
             statusText.innerText = "⏳ ציון גבולי באמריקאי. מטלת הכתיבה תקבע את הגורל שלך.";
             statusBadge.innerHTML = `<span class="bg-amber-600 text-white px-4 py-1.5 rounded-full text-xs font-black shadow-xs inline-block">ביצוע גבולי במבחן האמריקאי ⏳</span>`;

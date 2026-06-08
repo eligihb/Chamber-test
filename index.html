@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>בדיקה מהירה v1.4.2</title>
+    <title>בדיקה מהירה v1.4.3</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -166,6 +166,86 @@
             background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
             border-right: 4px solid #c9a227;
         }
+        .demo-key-banner {
+            background: linear-gradient(135deg, #7f1d1d 0%, #b91c1c 50%, #991b1b 100%);
+            color: #fff;
+            border: 3px solid #fbbf24;
+            border-radius: 0.875rem;
+            padding: 0.75rem 0.85rem;
+            text-align: center;
+            font-weight: 800;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            box-shadow: 0 4px 18px rgba(185, 28, 28, 0.45), inset 0 1px 0 rgba(255,255,255,0.15);
+            animation: demoBannerPulse 2.2s ease-in-out infinite;
+        }
+        .demo-key-banner strong {
+            display: block;
+            font-size: 0.92rem;
+            font-weight: 900;
+            color: #fef08a;
+            margin-bottom: 0.2rem;
+            letter-spacing: 0.02em;
+        }
+        @keyframes demoBannerPulse {
+            0%, 100% { box-shadow: 0 4px 18px rgba(185, 28, 28, 0.45), inset 0 1px 0 rgba(255,255,255,0.15); border-color: #fbbf24; }
+            50% { box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.35), 0 6px 22px rgba(185, 28, 28, 0.55); border-color: #fde047; }
+        }
+        .score-section-card {
+            border-radius: 1rem;
+            padding: 0.85rem 0.65rem;
+            text-align: center;
+            border: 2px solid;
+            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
+        }
+        .score-section-proc {
+            background: linear-gradient(155deg, #1e3a8a 0%, #2563eb 55%, #1d4ed8 100%);
+            border-color: #93c5fd;
+            color: #fff;
+        }
+        .score-section-subs {
+            background: linear-gradient(155deg, #581c87 0%, #7c3aed 55%, #6d28d9 100%);
+            border-color: #c4b5fd;
+            color: #fff;
+        }
+        .score-section-label {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            opacity: 0.92;
+            margin-bottom: 0.35rem;
+        }
+        .score-section-value {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 0.2rem;
+            line-height: 1;
+        }
+        .score-section-num {
+            font-size: 2.75rem;
+            font-weight: 900;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            letter-spacing: -0.02em;
+        }
+        .score-section-denom {
+            font-size: 1rem;
+            font-weight: 800;
+            opacity: 0.85;
+        }
+        .score-section-pct {
+            display: block;
+            margin-top: 0.35rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            background: rgba(255,255,255,0.2);
+            border-radius: 9999px;
+            padding: 0.15rem 0.55rem;
+            width: fit-content;
+            margin-inline: auto;
+        }
         .login-field-narrow {
             width: 100%;
             max-width: 13rem;
@@ -213,7 +293,7 @@
             <h1 class="text-lg font-extrabold tracking-tight leading-snug">בדיקה מהירה של מבחני לשכה</h1>
             <p class="text-[11px] text-amber-200/90 font-semibold mt-1">בדיקת מבחן לשכה 23/06/2026</p>
             <p id="user-greeting" class="hidden text-sm text-amber-200 font-bold mt-1.5"></p>
-            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.4.2</span></p>
+            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.4.3</span></p>
         </div>
 
         <!-- 🔒 לוח בקרה למנהל המשולב בשורה אחת חסרת סרבול 🔒 -->
@@ -248,6 +328,11 @@
                 <div class="welcome-card p-3 rounded-l-xl text-center">
                     <h2 class="text-xs font-bold text-slate-900">בדיקה מהירה של מבחני לשכה</h2>
                     <p class="text-[11px] text-slate-600 mt-0.5">בדיקת מבחן לשכה 23/06/2026</p>
+                </div>
+
+                <div id="demo-key-notice-welcome" class="demo-key-banner hidden" role="alert">
+                    <strong>⚠️ שים לב — טרם הוזנו נתוני אמת</strong>
+                    מפתח התשובות הנוכחי הוא לדוגמה בלבד. הציון והמחוון אינם סופיים עד להזנת פתרון המבחן האמיתי.
                 </div>
                 
                 <div class="space-y-3">
@@ -302,6 +387,10 @@
 
             <!-- מסך ביניים 2 -->
             <div id="step-review-alert" class="space-y-5 text-center py-4 hidden">
+                <div id="demo-key-notice-review" class="demo-key-banner hidden text-right" role="alert">
+                    <strong>⚠️ שים לב — טרם הוזנו נתוני אמת</strong>
+                    מפתח התשובות הנוכחי הוא לדוגמה בלבד. הציון שיוצג אינו סופי.
+                </div>
                 <div class="w-16 h-16 bg-amber-500 text-white rounded-full flex items-center justify-center text-3xl mx-auto shadow-md">⚠️</div>
                 <div class="space-y-2 px-2">
                     <h2 class="text-xl font-extrabold text-slate-900">הזנת התשובות הושלמה</h2>
@@ -377,33 +466,38 @@
                     </button>
                 </div>
 
+                <div id="demo-key-notice-results" class="demo-key-banner hidden" role="alert">
+                    <strong>⚠️ שים לב — טרם הוזנו נתוני אמת</strong>
+                    מפתח התשובות הנוכחי הוא לדוגמה בלבד. הציון, המחוון והניתוח אינם סופיים עד להזנת פתרון המבחן האמיתי.
+                </div>
+
                 <!-- כרטיס הציון המשוקלל המרכזי -->
-                <div id="score-box-bg" class="text-center p-5 rounded-2xl border-2 transition-all shadow-lg space-y-4">
+                <div id="score-box-bg" class="text-center p-5 rounded-2xl border-2 transition-all shadow-lg space-y-2">
                     <div class="space-y-0.5">
                         <p class="text-[10px] font-bold uppercase tracking-wider text-slate-600">הציון המשוקלל הסופי</p>
                         <div id="final-score" class="text-5xl font-black tracking-tight drop-shadow-xs">0</div>
                         <p id="score-status-text" class="text-xs font-extrabold pt-0.5"></p>
                         <div id="pass-status" class="pt-1"></div>
                     </div>
+                </div>
 
-                    <!-- חלוקת הפרקים בתוך הלוח הראשי -->
-                    <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-200/40 text-slate-900">
-                        <div class="p-2 rounded-xl bg-white/40 border border-black/5">
-                            <span class="block text-[10px] font-bold opacity-80">נכונות בדיוני</span>
-                            <div class="flex justify-center items-baseline gap-1 mt-0.5 font-bold">
-                                <span id="score-procedural" class="text-lg font-black text-blue-900">0</span>
-                                <span class="text-xs opacity-60 font-medium">מתוך</span>
-                                <span class="text-sm font-black text-slate-600">40</span>
-                            </div>
+                <!-- ציוני פרקים — כרטיסים בולטים ונפרדים -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="score-section-card score-section-proc">
+                        <span class="score-section-label">פרק א' · דיוני</span>
+                        <div class="score-section-value">
+                            <span id="score-procedural" class="score-section-num">0</span>
+                            <span class="score-section-denom">/ 40</span>
                         </div>
-                        <div class="p-2 rounded-xl bg-white/40 border border-black/5">
-                            <span class="block text-[10px] font-bold opacity-80">נכונות במהותי</span>
-                            <div class="flex justify-center items-baseline gap-1 mt-0.5 font-bold">
-                                <span id="score-substantive" class="text-lg font-black text-purple-900">0</span>
-                                <span class="text-xs opacity-60 font-medium">מתוך</span>
-                                <span class="text-sm font-black text-slate-600">40</span>
-                            </div>
+                        <span id="score-procedural-pct" class="score-section-pct">0%</span>
+                    </div>
+                    <div class="score-section-card score-section-subs">
+                        <span class="score-section-label">פרק ב' · מהותי</span>
+                        <div class="score-section-value">
+                            <span id="score-substantive" class="score-section-num">0</span>
+                            <span class="score-section-denom">/ 40</span>
                         </div>
+                        <span id="score-substantive-pct" class="score-section-pct">0%</span>
                     </div>
                 </div>
 
@@ -460,13 +554,23 @@
 
         <footer class="app-footer mt-auto shrink-0">
             <div>יישומון זה נבנה על ידי <span class="ye-brand">YE</span> ©</div>
-            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.4.2</div>
+            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.4.3</div>
         </footer>
 
     </div>
 
 <script>
-    const APP_VERSION = '1.4.2';
+    const APP_VERSION = '1.4.3';
+    /** שנה ל-false לאחר הזנת מפתח תשובות אמיתי במסך ניהול */
+    const DEMO_ANSWER_KEY_ACTIVE = true;
+
+    function updateDemoKeyNotices() {
+        const show = DEMO_ANSWER_KEY_ACTIVE;
+        ['demo-key-notice-welcome', 'demo-key-notice-review', 'demo-key-notice-results'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden', !show);
+        });
+    }
     const SESSION_KEY = 'mitkatek_lishka_user';
 
     const LETTER_ANSWER_CLASS = { 'א': 'answer-letter-a', 'ב': 'answer-letter-b', 'ג': 'answer-letter-g', 'ד': 'answer-letter-d' };
@@ -1290,6 +1394,8 @@
 
         document.getElementById('score-procedural').innerText = rawProceduralCorrect;
         document.getElementById('score-substantive').innerText = rawSubstantiveCorrect;
+        document.getElementById('score-procedural-pct').innerText = `${Math.round((rawProceduralCorrect / 40) * 100)}%`;
+        document.getElementById('score-substantive-pct').innerText = `${Math.round((rawSubstantiveCorrect / 40) * 100)}%`;
 
         if (totalUnsure > 0) {
             const accuracy = Math.round((unsureCorrect / totalUnsure) * 100);
@@ -1384,6 +1490,7 @@
 
     initPhoneInputs();
     restoreSessionToForm();
+    updateDemoKeyNotices();
 </script>
 
 </body>

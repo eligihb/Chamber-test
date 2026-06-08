@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>בדיקה מהירה v1.4.0</title>
+    <title>בדיקה מהירה v1.4.1</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -199,7 +199,7 @@
             <h1 class="text-lg font-extrabold tracking-tight leading-snug">בדיקה מהירה של מבחני לשכה</h1>
             <p class="text-[11px] text-amber-200/90 font-semibold mt-1">בדיקת מבחן לשכה 23/06/2026</p>
             <p id="user-greeting" class="hidden text-sm text-amber-200 font-bold mt-1.5"></p>
-            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.4.0</span></p>
+            <p class="text-[10px] text-slate-400 font-medium mt-1">v<span class="text-amber-300 font-bold">1.4.1</span></p>
         </div>
 
         <!-- 🔒 לוח בקרה למנהל המשולב בשורה אחת חסרת סרבול 🔒 -->
@@ -444,13 +444,13 @@
 
         <footer class="app-footer mt-auto shrink-0">
             <div>יישומון זה נבנה על ידי <span class="ye-brand">YE</span> ©</div>
-            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.4.0</div>
+            <div class="text-[10px] mt-0.5 opacity-50">גרסה 1.4.1</div>
         </footer>
 
     </div>
 
 <script>
-    const APP_VERSION = '1.4.0';
+    const APP_VERSION = '1.4.1';
     const SESSION_KEY = 'mitkatek_lishka_user';
 
     const LETTER_FLASH_BG = { 'א': 'flash-bg-a', 'ב': 'flash-bg-b', 'ג': 'flash-bg-g', 'ד': 'flash-bg-d' };
@@ -517,6 +517,7 @@
 
     function logout() {
         if (!confirm('להתנתק ולחזור למסך הכניסה?')) return;
+        haltLetterPipeline();
         clearSession();
         updateHeaderUser();
         ['step-quiz', 'step-intermission', 'step-review-alert', 'step-results'].forEach(id => {
@@ -525,12 +526,15 @@
         document.getElementById('step-register')?.classList.remove('hidden');
     }
 
+    let popGeneration = 0;
+
     function showLetterPop(letter, onDone) {
         const flash = document.getElementById('letter-flash');
         if (!flash) { if (onDone) onDone(); return; }
+        const gen = ++popGeneration;
         let finished = false;
         const finish = () => {
-            if (finished) return;
+            if (finished || gen !== popGeneration) return;
             finished = true;
             flash.classList.remove('flash-show');
             flash.textContent = '';
@@ -543,7 +547,7 @@
         void flash.offsetWidth;
         flash.classList.add('flash-show');
         flash.addEventListener('animationend', finish, { once: true });
-        setTimeout(finish, 500);
+        setTimeout(finish, 480);
     }
 
     let MASTER_ANSWERS = {
@@ -577,6 +581,26 @@
     let quizBusy = false;
     let letterQueue = [];
 
+    function isQuizStepActive() {
+        const step = document.getElementById('step-quiz');
+        return step && !step.classList.contains('hidden');
+    }
+
+    function haltLetterPipeline() {
+        letterQueue = [];
+        quizBusy = false;
+        popGeneration++;
+        showSaveWarn(false);
+        const flash = document.getElementById('letter-flash');
+        if (flash) {
+            flash.classList.remove('flash-show');
+            flash.textContent = '';
+            flash.setAttribute('aria-hidden', 'true');
+        }
+        const cap = document.getElementById('quiz-capture');
+        if (cap) cap.value = '';
+    }
+
     function showSaveWarn(show) {
         const el = document.getElementById('save-warn');
         if (el) el.classList.toggle('visible', !!show);
@@ -592,47 +616,68 @@
 
     function saveAnswerAtCurrent(norm) {
         const qNum = currentIdx + 1;
+        if (userAnswers[currentSection][qNum]) return false;
         userAnswers[currentSection][qNum] = norm;
         return userAnswers[currentSection][qNum] === norm;
     }
 
     function enqueueLetter(letter) {
+        if (!isQuizStepActive()) return;
         const norm = normalizeQuizLetter(letter);
         if (!norm) return;
+        const qNum = currentIdx + 1;
+        if (userAnswers[currentSection][qNum]) return;
         letterQueue.push(norm);
         processLetterQueue();
     }
 
     function processLetterQueue() {
-        if (quizBusy || letterQueue.length === 0) return;
+        if (quizBusy) return;
+        if (!isQuizStepActive()) {
+            letterQueue = [];
+            return;
+        }
+        if (letterQueue.length === 0) return;
+
         quizBusy = true;
         showSaveWarn(false);
 
         const norm = letterQueue.shift();
         const qNum = currentIdx + 1;
 
-        if (!saveAnswerAtCurrent(norm)) {
-            letterQueue.unshift(norm);
+        if (userAnswers[currentSection][qNum]) {
             quizBusy = false;
-            showSaveWarn(true);
             processLetterQueue();
             return;
         }
 
-        showLetterPop(norm, () => {
-            if (userAnswers[currentSection][qNum] !== norm) {
-                userAnswers[currentSection][qNum] = norm;
+        if (!saveAnswerAtCurrent(norm)) {
+            letterQueue.unshift(norm);
+            quizBusy = false;
+            showSaveWarn(true);
+            return;
+        }
+
+        const finalize = () => {
+            if (!isQuizStepActive()) {
+                haltLetterPipeline();
+                return;
             }
-            if (userAnswers[currentSection][qNum] !== norm) {
+            if (!userAnswers[currentSection][qNum]) {
                 showSaveWarn(true);
                 quizBusy = false;
-                processLetterQueue();
                 return;
             }
             tryAdvanceAfterAnswer(qNum);
             quizBusy = false;
             processLetterQueue();
-        });
+        };
+
+        if (letterQueue.length > 0) {
+            finalize();
+        } else {
+            showLetterPop(norm, finalize);
+        }
     }
 
     function tryAdvanceAfterAnswer(answeredQNum) {
@@ -649,12 +694,15 @@
 
         const missing = getMissingAnswers(currentSection);
         if (missing.length > 0) {
+            haltLetterPipeline();
             alert(`חסרות ${missing.length} תשובות — מעבר לשאלה ${missing[0]}`);
             currentIdx = missing[0] - 1;
             renderQuestion();
+            focusQuizCapture();
             return;
         }
 
+        haltLetterPipeline();
         if (currentSection === 'procedural') {
             document.getElementById('step-quiz').classList.add('hidden');
             document.getElementById('step-intermission').classList.remove('hidden');
@@ -667,6 +715,7 @@
                 document.getElementById('step-review-alert').classList.add('hidden');
                 document.getElementById('step-quiz').classList.remove('hidden');
                 renderQuestion();
+                focusQuizCapture();
                 return;
             }
             document.getElementById('step-quiz').classList.add('hidden');
@@ -893,8 +942,7 @@
         }
         saveSession(name, phone);
         updateHeaderUser();
-        letterQueue = [];
-        quizBusy = false;
+        haltLetterPipeline();
         document.getElementById('step-register').classList.add('hidden');
         document.getElementById('step-quiz').classList.remove('hidden');
         initQuizCapture();
@@ -972,18 +1020,19 @@
     function proceedToSubstantive() {
         const missing = getMissingAnswers('procedural');
         if (missing.length > 0) {
+            haltLetterPipeline();
             alert(`חסרות ${missing.length} תשובות בפרק הדיוני — מעבר לשאלה ${missing[0]}`);
             currentSection = 'procedural';
             currentIdx = missing[0] - 1;
             document.getElementById('step-intermission').classList.add('hidden');
             document.getElementById('step-quiz').classList.remove('hidden');
             renderQuestion();
+            focusQuizCapture();
             return;
         }
+        haltLetterPipeline();
         currentSection = 'substantive';
         currentIdx = 0;
-        letterQueue = [];
-        quizBusy = false;
         document.getElementById('step-intermission').classList.add('hidden');
         document.getElementById('step-quiz').classList.remove('hidden');
         renderQuestion();
@@ -991,14 +1040,17 @@
     }
 
     function backToQuizToVerify() {
+        haltLetterPipeline();
         currentSection = 'substantive';
         currentIdx = 39;
         document.getElementById('step-review-alert').classList.add('hidden');
         document.getElementById('step-quiz').classList.remove('hidden');
         renderQuestion();
+        focusQuizCapture();
     }
 
     function goBack() {
+        haltLetterPipeline();
         if (currentIdx > 0) {
             currentIdx--;
             renderQuestion();
@@ -1041,6 +1093,7 @@
     function showResults() {
         const missSub = getMissingAnswers('substantive');
         if (missSub.length > 0) {
+            haltLetterPipeline();
             alert(`חסרות ${missSub.length} תשובות בפרק המהותי — מעבר לשאלה ${missSub[0]}`);
             currentSection = 'substantive';
             currentIdx = missSub[0] - 1;
